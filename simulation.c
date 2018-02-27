@@ -24,11 +24,13 @@ struct Neuron {
     double I = 0;
     double x = 0;
     bool Spike = false;
-}void resetNeuron(struct Neuron neuron) {
+}
+void resetNeuron(struct Neuron neuron) {
     neuron.vm = Vr;
     neuron.x += b;
     neuron.vt = VTmax;
-}struct Poisson(double *A){
+}
+struct Poisson(double *A){
     bool Spike = false;
 }
 
