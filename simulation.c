@@ -3,22 +3,24 @@
 #include <stdlib.h>
 #include <time.h>
 
-//# Adex Parameters
-double C = 281;	//pF
-double gL = 30; //nS
-double taum = 281 / 30;	// C/gL	// double initilization of taum(?)
-double EL = -70.6;	//mV
-double DeltaT = 2;	//mV
-double vti = -50.4;	//mV
-//#vtrest = vti + 5 * DeltaT
-double vtrest = -45;	//mV
-double VTmax = 18;	//mV
-double tauvt = 50;	//ms
+double defaultclock_dt = 1*1e-3;	//ms
 
-double tauw = 144;	//ms
-double c = 4;	//ns
-double b = 0.805;	//nA
-double Vr = -70.6;	//mV
+//# Adex Parameters
+double C = 281*1e-12;	//pF
+double gL = 30*1e-9; //nS
+double taum = 281*1e-12 / 30*1e-9;	// C/gL	// double initilization of taum(?)
+double EL = -70.6*1e-3;	//mV
+double DeltaT = 2*1e-3;	//mV
+double vti = -50.4*1e-3;	//mV
+//#vtrest = vti + 5 * DeltaT
+double vtrest = -45*1e-3;	//mV
+double VTmax = 18*1e-3;	//mV
+double tauvt = 50*1e-3;	//ms
+
+double tauw = 144*1e-3;	//ms
+double c = 4*1e-9;	//ns
+double b = 0.0805*1e-9;	//nA
+double Vr = -70.6*1e-3;	//mV
 
 typedef struct {
     double vt;// = vtrest;
@@ -37,15 +39,30 @@ typedef struct {
     int Spike; 
 } Poisson;
 void SolveNeurons(Neuron* neurons, int N, int *SpikeArray){
-	for(int i = 0; i < N; i++){
-		if (rand() % 10 < 5) {
-			SpikeArray[i] = 0;
-		}	
-		else {
-			SpikeArray[i] = 1;
-		}
-	}
-
+    for(int i = 0; i < N; i++){
+        /*if (rand() % 10 < 5) {
+            SpikeArray[i] = 0;
+        }
+        else {
+            SpikeArray[i] = 1;
+        }*/
+        double _vm, _vt, _x;
+        _vm = (gL*(EL-neurons[i].vm)+gL*DeltaT*exp((neurons[i].vm-neurons[i].vt)/DeltaT)+neurons[i].I-neurons[i].x)/C;
+        printf("_vm = %.20f\n", _vm);
+        _vt = -(neurons[i].vt-vtrest)/tauvt;
+        printf("_vt = %.20f\n", _vm);
+        _x = (c*(neurons[i].vm-EL)-neurons[i].x)/tauw;
+        printf("_x = %.20f\n", _x);
+        neurons[i].vm += _vm * defaultclock_dt;
+        neurons[i].vt += _vt * defaultclock_dt;
+        neurons[i].x += _x * defaultclock_dt;
+        if(neurons[i].vm > neurons[i].vt){
+            printf("Reset\n");
+            resetNeuron(&neurons[i]);
+            SpikeArray[i] = 1;
+        }
+        else SpikeArray[i] = 0;
+    }
 }
 
 int main(void){
@@ -95,7 +112,7 @@ int main(void){
 	    double etaA = 0.15;
 	    //#etaA = 0.35    
 
-        double defaultclock_dt = 1;	//ms
+        //double defaultclock_dt = 1;	//ms
 
 	    
 	    /*//# Adex Parameters
@@ -212,7 +229,7 @@ int main(void){
 
 		int timesteps = stime*100/resolution_export;
 		for(int t = 0; t < timesteps; t++){			//add monitors for the variables we care about
-			SolveNeurons(neurons, N_T, SpikeArray);
+			SolveNeurons(neurons, N_T, SpikeArray);	// maybe should bring the for inside out for(int i =0; i < N_T; i++) SolveNeuron(neurons[i],Spikearray[i]);
 			printf("Loop %d\n",t);
 			for(int i = 0; i < N_T; i++){
 				printf("%d\n",SpikeArray[i]);
