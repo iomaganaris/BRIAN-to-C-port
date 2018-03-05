@@ -1,2 +1,2 @@
 simulation_make: simulation.c
-	gcc -o simulation simulation.c 
+	gcc simulation.c -lm -o simulation

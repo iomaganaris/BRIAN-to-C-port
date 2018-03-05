@@ -1,37 +1,68 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
-//Constant parameters initialization
+double defaultclock_dt = 1*1e-3;	//ms
+
 //# Adex Parameters
-    double C = 281;	//pF
-    double gL = 30; //nS
-    double taum = C / gL;
-    double EL = -70.6;	//mV
-    double DeltaT = 2;	//mV
-    double vti = -50.4;	//mV
-    //#vtrest = vti + 5 * DeltaT
-    double vtrest = -45;	//mV
-    double VTmax = 18;	//mV
-    double tauvt = 50;	//ms
+double C = 281*1e-12;	//pF
+double gL = 30*1e-9; //nS
+double taum = 281*1e-12 / 30*1e-9;	// C/gL	// double initilization of taum(?)
+double EL = -70.6*1e-3;	//mV
+double DeltaT = 2*1e-3;	//mV
+double vti = -50.4*1e-3;	//mV
+//#vtrest = vti + 5 * DeltaT
+double vtrest = -45*1e-3;	//mV
+double VTmax = 18*1e-3;	//mV
+double tauvt = 50*1e-3;	//ms
 
-    double tauw = 144;	//ms
-    double c = 4;	//ns
-    double b = 0.805;	//nA
-    double Vr = -70.6;	//mV
-struct Neuron {
-    double vt = vtrest;
-    double vm = EL;
-    double I = 0;
-    double x = 0;
-    bool Spike = false;
+double tauw = 144*1e-3;	//ms
+double c = 4*1e-9;	//ns
+double b = 0.0805*1e-9;	//nA
+double Vr = -70.6*1e-3;	//mV
+
+typedef struct {
+    double vt;// = vtrest;
+    double vm;// = EL;
+    double I;// = 0;
+    double x;// = 0;
+    int Spike;// = false;
+} Neuron;
+void resetNeuron(Neuron* neuron) {
+    neuron->vm = Vr;
+    neuron->x += b;
+    neuron->vt = VTmax;
 }
-void resetNeuron(struct Neuron neuron) {
-    neuron.vm = Vr;
-    neuron.x += b;
-    neuron.vt = VTmax;
-}
-struct Poisson(double *A){
-    bool Spike = false;
+typedef struct {
+	double* GaussArray;
+    int Spike; 
+} Poisson;
+void SolveNeurons(Neuron* neurons, int N, int *SpikeArray){
+    for(int i = 0; i < N; i++){
+        /*if (rand() % 10 < 5) {
+            SpikeArray[i] = 0;
+        }
+        else {
+            SpikeArray[i] = 1;
+        }*/
+        double _vm, _vt, _x;
+        _vm = (gL*(EL-neurons[i].vm)+gL*DeltaT*exp((neurons[i].vm-neurons[i].vt)/DeltaT)+neurons[i].I-neurons[i].x)/C;
+        printf("_vm = %.20f\n", _vm);
+        _vt = -(neurons[i].vt-vtrest)/tauvt;
+        printf("_vt = %.20f\n", _vm);
+        _x = (c*(neurons[i].vm-EL)-neurons[i].x)/tauw;
+        printf("_x = %.20f\n", _x);
+        neurons[i].vm += _vm * defaultclock_dt;
+        neurons[i].vt += _vt * defaultclock_dt;
+        neurons[i].x += _x * defaultclock_dt;
+        if(neurons[i].vm > neurons[i].vt){
+            printf("Reset\n");
+            resetNeuron(&neurons[i]);
+            SpikeArray[i] = 1;
+        }
+        else SpikeArray[i] = 0;
+    }
 }
 
 int main(void){
@@ -81,13 +112,13 @@ int main(void){
 	    double etaA = 0.15;
 	    //#etaA = 0.35    
 
-	    double defaultclock.dt = 1;	//ms
+        //double defaultclock_dt = 1;	//ms
 
-	    /*
-	    //# Adex Parameters
+	    
+	    /*//# Adex Parameters
 	    double C = 281;	//pF
 	    double gL = 30; //nS
-	    double taum = C / gL;
+	    double taum = C / gL;		// double initilization of taum(?)
 	    double EL = -70.6;	//mV
 	    double DeltaT = 2;	//mV
 	    double vti = -50.4;	//mV
@@ -133,10 +164,27 @@ int main(void){
 	    int N_S = N;
 	    Poisson *input;
 	    input = (Poisson*)malloc(sizeof(Poisson)*N_S);
-
-	    int N_T = 1;	//for the simulation we have, normaly is N
+	    for(int i = 0; i<N_S; i++){				// Initialization of Poisson Neurons
+	    	input[i].GaussArray = F_input1;
+	    	input[i].Spike = 0;
+	    }
+	    int N_T = N;	//for the simulation we have, normaly is N
 	    Neuron *neurons;
 	    neurons = (Neuron*)malloc(sizeof(Neuron)*N_T);
+	    for(int i = 0; i<N_T; i++){				// Initiliazation of Neurons
+	    	neurons[i].vt = vtrest;
+	    	neurons[i].vm = EL;
+	    	neurons[i].I = 0;
+	    	neurons[i].x = 0;
+	    	neurons[i].Spike = 0;
+	    }
+	    printf("neurons->vm\n");
+	    for(int i=0; i<N_T; i++){
+	    	printf("%lf\n",neurons[i].vm);
+	    }
+
+	    int *SpikeArray;
+	    SpikeArray = (int*)malloc(sizeof(int)*N);
 
 	    //To be initialized
 	    /*neurons.vt = vtrest
@@ -158,30 +206,36 @@ int main(void){
              dR/dt=(1-R)/tau_r : 1 (event-driven)
              du/dt=(U-u)/tau_u : 1 (event-driven)            
              '''*/
-	    Synapse syn[N_S][N_T] = CreateSynapses(input, neurons);	//2D Array of synapses. Each element/synapse has it's variables embedded.
+	    //Synapse syn[N_S][N_T] = CreateSynapses(input, neurons);	//2D Array of synapses. Each element/synapse has it's variables embedded.
 	    												//Must find a way to describe how they are connected
 	    //syn.connect_one_to_one(input, neurons)
-	    syn[:,:]=True	//what is that?
-	    syn.FBp=0
-	    syn.FBn=0
-	    syn.R=1
+	    //syn[:,:]=True	//what is that?	#TO DO
+	    //syn.FBp=0		#TO DO
+	    //syn.FBn=0		#TO DO
+	    //syn.R=1		#TO DO
 	    //syn.U='rand()*Uinit'
 	   	//syn.A='rand()*Ainit'
 	    //syn.U[:]=Umin
 	    //syn.U[:]=0.5
 	    
-	    for(int i =0; i < N; i++){					//Define gaussian input
+	    /*for(int i =0; i < N; i++){					//Define gaussian input
 	    	for(int j = 0; j < N; j++){ 
 	        syn[i][j].U = exp(-(((pow((i+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;
 	        syn[i][j].A = exp(-(((pow((i+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;
 	    	}
-		}
+		}*/
 
-		int timesteps = stime/resolution_export;
+	    srand(time(NULL));
+
+		int timesteps = stime*100/resolution_export;
 		for(int t = 0; t < timesteps; t++){			//add monitors for the variables we care about
-			SpikeArray = SolveNeurons();
-			UpdateSynapses_pre(SpikeArray);
-			UpdateSynapses_post(SpikeArray);
+			SolveNeurons(neurons, N_T, SpikeArray);	// maybe should bring the for inside out for(int i =0; i < N_T; i++) SolveNeuron(neurons[i],Spikearray[i]);
+			printf("Loop %d\n",t);
+			for(int i = 0; i < N_T; i++){
+				printf("%d\n",SpikeArray[i]);
+			}
+			//UpdateSynapses_pre(SpikeArray);
+			//UpdateSynapses_post(SpikeArray);
 		}
 	}
 	return 0;
