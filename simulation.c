@@ -188,50 +188,72 @@ void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_T, int *SpikeArray, 
 
 void print_synapses(Synapse** syn, int N_S, int N_T){
 	printf("conn\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
 			//printf("conn= %d, w= %lf, FFp= %lf, FBp= %lf, FBn= %lf, R= %lf, u= %lf, U= %lf, A= %lf, lastup= %lf, target_I= %lf\n",syn[i][j].conn,syn[i][j].w,syn[i][j].FFp,syn[i][j].FBp,syn[i][j].FBn,syn[i][j].R,syn[i][j].u,syn[i][j].U,syn[i][j].A,syn[i][j].lastupdate,syn[i][j].target_I);
 			printf("%d, ", syn[i][j].conn);
+		printf("\n");
+	}
 	printf("\nw\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].w);	
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
+			printf("%.8e, ", syn[i][j].w);
+		printf("\n");		
+	}
 	printf("\nFFp\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].FFp);	
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
+			printf("%.8e, ", syn[i][j].FFp);
+		printf("\n");	
+	}
 	printf("\nFBp\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
 			printf("%.8e, ", syn[i][j].FBp);	
+		printf("\n");
+	}
 	printf("\nFBn\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].FBn);	
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
+			printf("%.8e, ", syn[i][j].FBn);
+		printf("\n");		
+	}
 	printf("\nR\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
 			printf("%.8e, ", syn[i][j].R);
+		printf("\n");
+	}
 	printf("\nu\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].u);		
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
+			printf("%.8e, ", syn[i][j].u);
+		printf("\n");		
+	}
 	printf("\nU\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
 			printf("%.8e, ", syn[i][j].U);
+		printf("\n");
+	}
 	printf("\nA\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
 			printf("%.8e, ", syn[i][j].A);	
+		printf("\n");
+	}
 	printf("\nlastupdate\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
 			printf("%.8e, ", syn[i][j].lastupdate);		
+		printf("\n");
+	}
 	printf("\ntarget_I\n");
-	for(int i =0; i < N_S; i++)
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].target_I);		
+	for(int i =0; i < N_S+1; i++){
+		for(int j = 0; j < N_T+1; j++)
+			printf("%.8e, ", syn[i][j].target_I);
+		printf("\n");		
+	}
 	printf("\n");
 }
 
@@ -345,7 +367,7 @@ int main(void){
 	    neurons = (Neuron*)malloc(sizeof(Neuron)*N_T);
 	    for(int i = 0; i<N_T; i++){				// Initiliazation of Neurons
 	    	neurons[i].vt = vtrest;
-	    	neurons[i].vm = vtrest + 0.005;//EL;
+	    	neurons[i].vm = EL; //vtrest + 0.005;//EL;
 	    	neurons[i].I = 0;
 	    	neurons[i].x = 0;
 	    	neurons[i].Spike = 0;
@@ -455,12 +477,12 @@ int main(void){
 			if(t*resolution_export == 0.001) SpikeArray[N_S] = 1;
 			printf("Synapses//////////////////////////////////////////////////////\n");
 			print_synapses(syn,N_S,N_T);
-			UpdateSynapses_pre(syn, neurons, N_S, N_T, SpikeArray, t*resolution_export);
+			UpdateSynapses_pre(syn, neurons, N_S+1, N_T+1, SpikeArray, t*resolution_export);
 			printf("\n\n\nSynapses after pre update\n\n\n");
 			print_synapses(syn,N_S,N_T);
-			UpdateSynapses_post(syn, N_S, N_T, SpikeArray, t*resolution_export);
-			printf("\n\n\nSynapses after post update\n\n\n");
-			print_synapses(syn,N_S,N_T);
+			//UpdateSynapses_post(syn, N_S, N_T, SpikeArray, t*resolution_export);
+			//printf("\n\n\nSynapses after post update\n\n\n");
+			//print_synapses(syn,N_S,N_T);
 			//UpdateSynapses_post(SpikeArray);
 
 		}
