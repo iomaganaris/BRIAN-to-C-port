@@ -145,6 +145,40 @@ void UpdateSynapses_pre(Synapse** Synapses, int N_S, int N_T, int *SpikeArray, d
 	}
 }
 
+void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_T, int *SpikeArray, double t){
+	for (int i = 0; i < N_S; i++){
+	    if (SpikeArray[i] > 0){
+	        for (int j = 0; j < N_T; j++){
+	            if (Synapses[j][i].conn){
+	                Synapses[j][i].FFp = Synapses[j][i].FFp * exp(-(-Synapses[j][i].lastupdate + t)/tau_FFp);
+	                Synapses[j][i].FBn = Synapses[j][i].FBn * exp(-(-Synapses[j][i].lastupdate + t)/tau_FBn);
+	                Synapses[j][i].u = Synapses[j][i].U + (-Synapses[j][i].U + Synapses[i][j].u) * exp(-(-Synapses[j][i].lastupdate + t)/tau_u);
+	                Synapses[j][i].FBp = Synapses[j][i].FBp * exp(-(-Synapses[j][i].lastupdate + t)/tau_FBp);
+	                Synapses[j][i].R = (Synapses[j][i].R - 1) * exp(-(-Synapses[j][i].lastupdate + t)/tau_r) + 1;
+	                Synapses[j][i].A = Synapses[j][i].A + etaA * (AFFp * Synapses[j][i].FFp * Synapses[j][i].FBn);
+	                int mean = 0, num = 0;
+	                for (int k=0; i<N_S; i++){
+	                    for (int l=0; j<N_T; j++){
+	                        //auto edw to if boroume na to apofigoume an arxikopoioume tis metablites tou struct sto 0
+	                        if (Synapses[k][l].conn){
+	                            mean += AFFp * Synapses[j][i].FFp * Synapses[j][i].FBn;
+	                            num++;
+	                        }
+	                    }
+	                }
+	                mean = mean / num;
+	                Synapses[j][i].A = Synapses[j][i].A - etaA * 0.5 * mean; //amfibola swsto, sigoura mi apodotiko
+	                if (Synapses[j][i].A < Amin) Synapses[j][i].A = Amin;
+	                else if (Synapses[j][i].A > Amax) Synapses[j][i].A = Amax;
+	                Synapses[j][i].w = Synapses[j][i].U * Synapses[j][i].A;
+	                Synapses[j][i].FBp += 1;
+	                Synapses[j][i].FBn += 1;
+	            }
+	        }
+	    }
+	}
+}
+
 void print_synapses(Synapse** syn, int N_S, int N_T){
 	printf("conn\n");
 	for(int i =0; i < N_S; i++)
@@ -302,7 +336,7 @@ int main(void){
 	    neurons = (Neuron*)malloc(sizeof(Neuron)*N_T);
 	    for(int i = 0; i<N_T; i++){				// Initiliazation of Neurons
 	    	neurons[i].vt = vtrest;
-	    	neurons[i].vm = vtrest + 0.001;//EL;
+	    	neurons[i].vm = vtrest + 0.005;//EL;
 	    	neurons[i].I = 0;
 	    	neurons[i].x = 0;
 	    	neurons[i].Spike = 0;
