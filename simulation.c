@@ -118,7 +118,7 @@ void SolveNeurons(Neuron* neurons, int N, int *SpikeArray){
     }
 }
 
-void UpdateSynapses_pre(Synapse** Synapses, int N_S, int N_T, int *SpikeArray, double t){
+void UpdateSynapses_pre(Synapse** Synapses, Neuron* neurons, int N_S, int N_T, int *SpikeArray, double t){
 	//an baloume ekswteriki eisodo thelei i<N+1 logika
 	for (int i = 0; i < N_S; i++){
 		if (SpikeArray[i] > 0){
@@ -140,6 +140,13 @@ void UpdateSynapses_pre(Synapse** Synapses, int N_S, int N_T, int *SpikeArray, d
 					Synapses[i][j].u += Synapses[i][j].U * (1 - Synapses[i][j].u);
 					Synapses[i][j].lastupdate = t;
 				}
+			}
+		}
+	}
+	for (int i = 0; i < N_S; i++){
+		for (int j = 0; j < N_T; j++){
+			if (Synapses[i][j].conn){
+				neurons[j].I = Synapses[i][j].target_I;
 			}
 		}
 	}
@@ -445,10 +452,14 @@ int main(void){
 			}*/
 			printf("Synapses\n");
 			print_synapses(syn,N_S,N_T);
-			UpdateSynapses_pre(syn, N_S, N_T, SpikeArray, t*resolution_export);
-			printf("Synapses after pre update\n");
+			UpdateSynapses_pre(syn, neurons, N_S, N_T, SpikeArray, t*resolution_export);
+			printf("\n\n\nSynapses after pre update\n\n\n");
+			print_synapses(syn,N_S,N_T);
+			UpdateSynapses_post(syn, N_S, N_T, SpikeArray, t*resolution_export);
+			printf("\n\n\nSynapses after post update\n\n\n");
 			print_synapses(syn,N_S,N_T);
 			//UpdateSynapses_post(SpikeArray);
+
 		}
 	}
 	return 0;
