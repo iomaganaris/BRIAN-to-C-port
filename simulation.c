@@ -241,12 +241,14 @@ int main(void){
 
 	for(int nrun = 0; nrun < nruns; nrun++){
 		double realtime = 0;
-		double stime = 0.2; //second
+		double stime = 1; //second
 		double stime2 = 50; //second
 
 		double resolution_export = 10 * 1e-3; //every x ms
 
 		int N = 10;
+		int N_S = 1;
+		int N_T = N;	//for the simulation we have, normaly is N
 		/*double taum = 10 * 1e-3; //ms
 		double Ee = 0 * 1e-3; //mV
 		double tuae = 2 * 1e-3; //ms
@@ -315,30 +317,30 @@ int main(void){
 
 	    //Define input 1
 	    double *F_input1;
-	    F_input1 = (double*)malloc(sizeof(double)*N);
+	    F_input1 = (double*)malloc(sizeof(double)*N_S);
 	    //F_input1[input1_pos-rad:input1_pos+rad] = Fon
-	    for(int i = 0; i < N; i++){
+	    for(int i = 0; i < N_S; i++){
 	    	F_input1[i] = Foff;			//maybe is not needed
 	    	F_input1[i] = exp(-(pow((i+1)-input1_pos,2)/(2.0*pow(rad,2))))*(Fon-Foff)+Foff; //Define gaussian input
 	    }
 
 	    //Define input 2
 	    double *F_input2;
-	    F_input2 = (double*)malloc(sizeof(double)*N);
+	    F_input2 = (double*)malloc(sizeof(double)*N_S);
 	    //F_input2[input2_pos-rad:input2_pos+rad] = Fon
-	    for(int i = 0; i < N; i++){
+	    for(int i = 0; i < N_S; i++){
 	    	F_input2[i] = Foff;			//maybe is not needed
 	    	F_input2[i] = exp(-(pow((i+1)-input2_pos,2)/(2.0*pow(rad,2))))*(Fon-Foff)+Foff; //Define gaussian input
 	    }
 
-	    int N_S = N;
+	    
 	    Poisson *input;
 	    input = (Poisson*)malloc(sizeof(Poisson)*N_S);
 	    for(int i = 0; i<N_S; i++){				// Initialization of Poisson Neurons
 	    	input[i].GaussArray = F_input1;
 	    	input[i].Spike = 0;
 	    }
-	    int N_T = N;	//for the simulation we have, normaly is N
+	    
 	    Neuron *neurons;
 	    neurons = (Neuron*)malloc(sizeof(Neuron)*N_T);
 	    for(int i = 0; i<N_T; i++){				// Initiliazation of Neurons
@@ -396,7 +398,7 @@ int main(void){
 	    // Initialization of Synapses for Neurons
 	    for(int i = 0; i < N_S; i++){
 	    	for(int j = 0; j < N_T; j++){
-	    		syn[i][j].conn = 1;	// all connected
+	    		syn[i][j].conn = 0;	// all connected
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
@@ -406,21 +408,21 @@ int main(void){
 	    }
 	    // Initialization of Synapses for external input
 		for(int i = 0; i < N_S; i++){
-	    	syn[i][N_T].conn = 0;	// all connected
+	    	syn[i][N_T].conn = 1;	// all connected
     		syn[i][N_T].FBp = 0;
     		syn[i][N_T].FBn = 0;
     		syn[i][N_T].R = 1;
-    		syn[i][N_T].U = exp(-(((pow(((N_S*N_T+i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-    		syn[i][N_T].A = exp(-(((pow(((N_S*N_T+i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+    		syn[i][N_T].U = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+    		syn[i][N_T].A = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    }
 	    // Initialization of Synapses for external input
 	    for(int j = 0; j < N_T; j++){
-	    	syn[N_S][j].conn = 0;	// all connected
+	    	syn[N_S][j].conn = 1;	// all connected
     		syn[N_S][j].FBp = 0;
     		syn[N_S][j].FBn = 0;
     		syn[N_S][j].R = 1;
-    		syn[N_S][j].U = exp(-(((pow(((N_T+j*N_S)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-    		syn[N_S][j].A = exp(-(((pow(((N_T+j*N_S)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+    		syn[N_S][j].U = exp(-(((pow(((j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+    		syn[N_S][j].A = exp(-(((pow(((j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    }
 
 	    /*printf("U:\n");
@@ -450,7 +452,8 @@ int main(void){
 			for(int i = 0; i < N_T; i++){
 				printf("%d\n",SpikeArray[i]);
 			}*/
-			printf("Synapses\n");
+			if(t*resolution_export == 0.001) SpikeArray[N_S] = 1;
+			printf("Synapses//////////////////////////////////////////////////////\n");
 			print_synapses(syn,N_S,N_T);
 			UpdateSynapses_pre(syn, neurons, N_S, N_T, SpikeArray, t*resolution_export);
 			printf("\n\n\nSynapses after pre update\n\n\n");
