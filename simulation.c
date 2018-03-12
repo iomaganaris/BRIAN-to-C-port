@@ -170,7 +170,7 @@ void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_T, int* SpikeArray, 
 	            	fflush(stdout);
 	                Synapses[j][i].FFp = Synapses[j][i].FFp * exp(-(-Synapses[j][i].lastupdate + t)/tau_FFp);
 	                Synapses[j][i].FBn = Synapses[j][i].FBn * exp(-(-Synapses[j][i].lastupdate + t)/tau_FBn);
-	                Synapses[j][i].u = Synapses[j][i].U + (-Synapses[j][i].U + Synapses[i][j].u) * exp(-(-Synapses[j][i].lastupdate + t)/tau_u);
+	                Synapses[j][i].u = Synapses[j][i].U + (-Synapses[j][i].U + Synapses[j][i].u) * exp(-(-Synapses[j][i].lastupdate + t)/tau_u);
 	                Synapses[j][i].FBp = Synapses[j][i].FBp * exp(-(-Synapses[j][i].lastupdate + t)/tau_FBp);
 	                Synapses[j][i].R = (Synapses[j][i].R - 1) * exp(-(-Synapses[j][i].lastupdate + t)/tau_r) + 1;
 	                Synapses[j][i].A = Synapses[j][i].A + etaA * (AFFp * Synapses[j][i].FFp * Synapses[j][i].FBn);
@@ -513,7 +513,7 @@ int main(void){
 			printf("t: %lf----------------------------------------------------------------------------------------\n",t*defaultclock_dt);
 			print_neurons(neurons, N_Group_T+N_S);
 			SolveNeurons(neurons, N_Group_T, SpikeArray);	// maybe should bring the for inside out for(int i =0; i < N_T; i++) SolveNeuron(neurons[i],Spikearray[i]);
-			printf("After SolveNeurons\n");
+			printf("After SolveNeurons, t: %lf\n",t*defaultclock_dt);
 			print_neurons(neurons, N_Group_T+N_S);
 			/*printf("Loop %d\n",t);
 			for(int i = 0; i < N_Group_T+N_S; i++){
@@ -553,13 +553,13 @@ int main(void){
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
 			print_synapses(syn,N_S+N_Group_S,N_Group_S);
 			UpdateSynapses_pre(syn, neurons, N_S+N_Group_S, N_Group_T+N_S, SpikeArray, t*defaultclock_dt);
-			printf("\n\n\nSynapses after pre update\n\n\n");
+			printf("\n\n\nSynapses after pre update, t: %lf\n\n\n",t*defaultclock_dt);
 			
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
 			print_synapses(syn,N_S+N_Group_S,N_Group_S);
 			fflush(stdout);
-			UpdateSynapses_post(syn, N_S+N_Group_S, N_Group_T+N_S, SpikeArray, t*defaultclock_dt);
-			printf("\n\n\nSynapses after post update\n\n\n");
+			UpdateSynapses_post(syn, N_S+N_Group_S, N_Group_T, SpikeArray, t*defaultclock_dt);
+			printf("\n\n\nSynapses after post update, t: %lf\n\n\n",t*defaultclock_dt);
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
 			print_synapses(syn,N_S+N_Group_S,N_Group_S);
 			print_neurons(neurons, N_Group_T+N_S);
