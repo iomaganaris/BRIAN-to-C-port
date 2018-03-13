@@ -145,16 +145,16 @@ void UpdateSynapses_pre(Synapse** Synapses, Neuron* neurons, int N_S, int N_T, i
 			}
 		}
 	}
-	
-	for (int i = 0; i < N_S; i++){
-		for (int j = 0; j < N_T; j++){
+	for (int j = 0; j < N_T; j++){
+		for (int i = 0; i < N_S; i++){
 			if (Synapses[i][j].conn && SpikeArray[i]){
-				printf("i: %d, j: %d\n",i,j);
+				//printf("i: %d, j: %d\n",i,j);
 				neurons[j].I = Synapses[i][j].target_I;
+				printf("j: %d, neurons[j]= %lf",j,neurons[j].I);
+				break;
 			}
 		}
 	}
-
 }
 
 void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_T, int* SpikeArray, double t){
