@@ -345,9 +345,16 @@ void print_synapses(Synapse** syn, int N_S, int N_T){
 	}
 	printf("\ntarget_I\n");
 	for(int i =0; i < N_S; i++){
+<<<<<<< HEAD
 		for(int j = 0; j < N_T; j++)
 			printf("%.8e, ", syn[i][j].target_I);
 		printf("\n");		
+=======
+		for(int j = 0; j < N_T; j++){
+			printf("%.8e, ", syn[i][j].target_I);
+			if((i*N_T+j)%4 == 0) printf("\n");	
+		}	
+>>>>>>> Neof
 	}
 	printf("\n");
 }
@@ -593,6 +600,45 @@ int main(void){
 			if(t*defaultclock_dt == 0.002) SpikeArray[31+N_Group_S] = 1;
 			else SpikeArray[31+N_Group_S] = 0;
 
+<<<<<<< HEAD
+=======
+			if(t*defaultclock_dt == 0.005) SpikeArray[28+N_Group_S] = 1;
+			else SpikeArray[28+N_Group_S] = 0;
+
+			if(t*defaultclock_dt == 0.006 || t*defaultclock_dt == 0.007) SpikeArray[22+N_Group_S] = 1;
+			else SpikeArray[22+N_Group_S] = 0;
+
+			if(t*defaultclock_dt == 0.008){
+				SpikeArray[23+N_Group_S] = 1;
+				SpikeArray[26+N_Group_S] = 1;
+				SpikeArray[35+N_Group_S] = 1;
+			} 
+			else {
+				SpikeArray[23+N_Group_S] = 0;
+				SpikeArray[26+N_Group_S] = 0;
+				SpikeArray[35+N_Group_S] = 0;
+			}
+
+			if(t*defaultclock_dt == 0.009) SpikeArray[19+N_Group_S] = 1;
+			else SpikeArray[19+N_Group_S] = 0;
+
+			if(t*defaultclock_dt == 0.011) SpikeArray[68+N_Group_S] = 1;
+			else SpikeArray[68+N_Group_S] = 0;
+
+			if(t*defaultclock_dt == 0.012) SpikeArray[32+N_Group_S] = 1;
+			else SpikeArray[32+N_Group_S] = 0;
+
+			if(t*defaultclock_dt == 0.013) SpikeArray[31+N_Group_S] = 1;
+			else SpikeArray[31+N_Group_S] = 0;
+
+			if(t*defaultclock_dt == 0.014) SpikeArray[21+N_Group_S] = 1;
+			else SpikeArray[21+N_Group_S] = 0;
+
+			if(t*defaultclock_dt == 0.014) SpikeArray[77+N_Group_S] = 1;
+			else SpikeArray[77+N_Group_S] = 0;
+
+
+>>>>>>> Neof
 			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
 			else SpikeArray[6+N_Group_S] = 0;
 
