@@ -67,7 +67,7 @@ typedef struct {
 } Neuron;
 
 typedef struct {
-	double* GaussArray;
+	double GaussArray;
     int Spike; 
 } Poisson;
 
@@ -90,6 +90,23 @@ typedef struct {
 	double lastupdate;
 	double target_I;
 } Synapse;
+double random_0_1(){
+	return (double)rand()/(double)((unsigned)RAND_MAX+1);
+}
+void PoissonThreshold(Poisson* input, int N_S, int N_T, int* SpikeArray){
+	for(int i = 0; i<N_S; i++){
+		if(random_0_1()<input[i].GaussArray*defaultclock_dt){
+			input[i].Spike = 1;
+			SpikeArray[N_T+i] = 1;
+			printf("PoissonThreshold i= %d\n",i);
+		} 
+		else{
+			input[i].Spike = 0;
+			SpikeArray[N_T+i] = 0;
+		}
+	}
+	return;
+}
 
 void SolveNeurons(Neuron* neurons, int N, int *SpikeArray){
     for(int i = 0; i < N; i++){
@@ -151,7 +168,7 @@ void UpdateSynapses_pre(Synapse** Synapses, Neuron* neurons, int N_S, int N_T, i
 				//printf("i: %d, j: %d\n",i,j);
 				neurons[j].I = Synapses[i][j].target_I;
 				printf("j: %d, neurons[j]= %lf",j,neurons[j].I);
-				break;
+				//break;
 			}
 		}
 	}
@@ -241,6 +258,7 @@ void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_T, int* SpikeArray, 
 	            	Synapses[j][i].w = Synapses[j][i].U * Synapses[j][i].A;
 	                Synapses[j][i].FBp += 1;
 	                Synapses[j][i].FBn += 1;
+	                Synapses[j][i].lastupdate = t;
 	            }
 	        }
 	    }
@@ -285,9 +303,11 @@ void print_synapses(Synapse** syn, int N_S, int N_T){
 	}
 	printf("\nw\n");
 	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].w);
-		printf("\n");		
+		for(int j = 0; j < N_T; j++){
+			printf("%.8e ", syn[i][j].w);
+			if((i*N_T+j)%4 == 0) printf("\n");
+		}
+		//printf("\n");		
 	}
 	printf("\nFFp\n");
 	for(int i =0; i < N_S; i++){
@@ -340,21 +360,15 @@ void print_synapses(Synapse** syn, int N_S, int N_T){
 	printf("\nlastupdate\n");
 	for(int i =0; i < N_S; i++){
 		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].lastupdate);		
+			printf("%lf, ", syn[i][j].lastupdate);		
 		//printf("\n");
 	}
 	printf("\ntarget_I\n");
 	for(int i =0; i < N_S; i++){
-<<<<<<< HEAD
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].target_I);
-		printf("\n");		
-=======
 		for(int j = 0; j < N_T; j++){
 			printf("%.8e, ", syn[i][j].target_I);
 			if((i*N_T+j)%4 == 0) printf("\n");	
 		}	
->>>>>>> Neof
 	}
 	printf("\n");
 }
@@ -444,10 +458,13 @@ int main(void){
 	    double *F_input1;
 	    F_input1 = (double*)malloc(sizeof(double)*N_S);
 	    //F_input1[input1_pos-rad:input1_pos+rad] = Fon
+	    printf("F_input1\n");
 	    for(int i = 0; i < N_S; i++){
 	    	F_input1[i] = Foff;			//maybe is not needed
 	    	F_input1[i] = exp(-(pow((i+1)-input1_pos,2)/(2.0*pow(rad,2))))*(Fon-Foff)+Foff; //Define gaussian input
+	    	printf("%lf ",F_input1[i]);
 	    }
+	    printf("\n");
 
 	    //Define input 2
 	    double *F_input2;
@@ -462,7 +479,7 @@ int main(void){
 	    Poisson *input;
 	    input = (Poisson*)malloc(sizeof(Poisson)*N_S);
 	    for(int i = 0; i<N_S; i++){				// Initialization of Poisson Neurons
-	    	input[i].GaussArray = F_input1;
+	    	input[i].GaussArray = F_input1[i];
 	    	input[i].Spike = 0;
 	    }
 	    
@@ -574,8 +591,8 @@ int main(void){
 
 		int timesteps = stime/defaultclock_dt;
 		printf("timesteps=%d\n",timesteps);
-		for(double t = 0; t < timesteps; t++){			//add monitors for the variables we care about
-			printf("t: %lf----------------------------------------------------------------------------------------\n",t*defaultclock_dt);
+		for(int t = 0; t < timesteps; t++){			//add monitors for the variables we care about
+			printf("t: %.20lf----------------------------------------------------------------------------------------\n",t*defaultclock_dt);
 			print_neurons(neurons, N_Group_T+N_S);
 			SolveNeurons(neurons, N_Group_T, SpikeArray);	// maybe should bring the for inside out for(int i =0; i < N_T; i++) SolveNeuron(neurons[i],Spikearray[i]);
 			printf("After SolveNeurons, t: %lf\n",t*defaultclock_dt);
@@ -585,30 +602,30 @@ int main(void){
 				printf("%d\n",SpikeArray[i]);
 			}
 			*/
-			if(t*defaultclock_dt == 0 || t*defaultclock_dt == 0.001) SpikeArray[25+N_Group_S] = 1;
+			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
+			if(t == 0 || t == 1) SpikeArray[25+N_Group_S] = 1;
 			else SpikeArray[25+N_Group_S] = 0;
 			
-			if(t*defaultclock_dt == 0) SpikeArray[46+N_Group_S] = 1;
+			if(t == 0) SpikeArray[46+N_Group_S] = 1;
 			else SpikeArray[46+N_Group_S] = 0;
 
 			//if(t*defaultclock_dt == 0.001) SpikeArray[25+N_Group_S] = 1;
 			//else SpikeArray[25+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.002) SpikeArray[24+N_Group_S] = 1;
+			if(t == 2) SpikeArray[24+N_Group_S] = 1;
 			else SpikeArray[24+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.002) SpikeArray[31+N_Group_S] = 1;
+			if(t == 2 || t == 13) SpikeArray[31+N_Group_S] = 1;
 			else SpikeArray[31+N_Group_S] = 0;
 
-<<<<<<< HEAD
-=======
-			if(t*defaultclock_dt == 0.005) SpikeArray[28+N_Group_S] = 1;
+
+			if(t == 5) SpikeArray[28+N_Group_S] = 1;
 			else SpikeArray[28+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.006 || t*defaultclock_dt == 0.007) SpikeArray[22+N_Group_S] = 1;
+			if(t == 6 || t == 7) SpikeArray[22+N_Group_S] = 1;
 			else SpikeArray[22+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.008){
+			if(t == 8){
 				SpikeArray[23+N_Group_S] = 1;
 				SpikeArray[26+N_Group_S] = 1;
 				SpikeArray[35+N_Group_S] = 1;
@@ -619,26 +636,23 @@ int main(void){
 				SpikeArray[35+N_Group_S] = 0;
 			}
 
-			if(t*defaultclock_dt == 0.009) SpikeArray[19+N_Group_S] = 1;
+			if(t == 9) SpikeArray[19+N_Group_S] = 1;
 			else SpikeArray[19+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.011) SpikeArray[68+N_Group_S] = 1;
+			if(t == 11) SpikeArray[68+N_Group_S] = 1;
 			else SpikeArray[68+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.012) SpikeArray[32+N_Group_S] = 1;
+			if(t == 12) SpikeArray[32+N_Group_S] = 1;
 			else SpikeArray[32+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.013) SpikeArray[31+N_Group_S] = 1;
-			else SpikeArray[31+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.014) SpikeArray[21+N_Group_S] = 1;
+			if(t == 14) SpikeArray[21+N_Group_S] = 1;
 			else SpikeArray[21+N_Group_S] = 0;
 
-			if(t*defaultclock_dt == 0.014) SpikeArray[77+N_Group_S] = 1;
+			if(t == 14) SpikeArray[77+N_Group_S] = 1;
 			else SpikeArray[77+N_Group_S] = 0;
 
 
->>>>>>> Neof
 			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
 			else SpikeArray[6+N_Group_S] = 0;
 
