@@ -249,8 +249,8 @@ void print_synapses(Synapse** syn, int N_S, int N_T){
 	for(int i =0; i < N_S; i++){
 		for(int j = 0; j < N_T; j++){
 			printf("%.8e, ", syn[i][j].target_I);
-			if((i*N_T+j+1)%4 == 0) printf("\n");	
-		}	
+		}
+		printf("\n");	
 	}
 	printf("\n");
 }

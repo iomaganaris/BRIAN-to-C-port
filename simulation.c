@@ -14,7 +14,7 @@ double tuae = 2 * 1e-3; //ms
 double Fon = 50; //Hz
 double Foff = 3; //Hz
 
-double s = 100*1e-10; 
+double s = 500000;//100*1e-10; 
 double Amax = 2.0;
 double Amin = 0;
 double Ainit = 0.1;
@@ -71,64 +71,10 @@ int main(void){
 
 		double resolution_export = 10 * 1e-3; //every x ms
 
-		int N = 1;
-		int N_S = 100;
-		int N_Group_S = 0;
+		int N = 10;
+		int N_S = 0;//100;
+		int N_Group_S = N;
 		int N_Group_T = N;	//for the simulation we have, normaly is N
-		/*double taum = 10 * 1e-3; //ms
-		double Ee = 0 * 1e-3; //mV
-		double tuae = 2 * 1e-3; //ms
-		double Fon = 50; //Hz
-		double Foff = 3; //Hz
-
-		double s = 100*1e-10; 
-		double Amax = 2.0;
-		double Amin = 0;
-		double Ainit = 0.1;
-		double Umax = 1.0;
-		double Umin = 0;
-		double Uinit = 0.1;
-
-		double dFBn = 0;
-		double dFBp = 0;
-		double dFFp = 0;
-
-		//#Short-term plasticity params
-	    double tau_u = 50 * 1e-3;	//ms
-	    double tau_r = 200 * 1e-3;	//ms
-
-	    //#prepostSTDP params: AFBn tau_FBn AFBp tau_FBp AFFp tau_FFp
-	    double params[6] = {0.1771,    0.0327,    0.1548,    0.2302,    0.0618,    0.0666};
-	    double AFBn = params[0];
-	    double tau_FBn = params[1]*1e3 * 1e-3;	//ms
-	    double AFBp = params[2];
-	    double tau_FBp = params[3]*1e3 * 1e-3;	//ms
-	    double AFFp = params[4];
-	    double tau_FFp = params[5]*1e3 * 1e-3;	//ms
-	    //#etaU = 0.35
-	    double etaU = 0.15;
-	    double etaA = 0.15;
-	    //#etaA = 0.35  */  
-
-        //double defaultclock_dt = 1;	//ms
-
-	    
-	    /*//# Adex Parameters
-	    double C = 281;	//pF
-	    double gL = 30; //nS
-	    double taum = C / gL;		// double initilization of taum(?)
-	    double EL = -70.6;	//mV
-	    double DeltaT = 2;	//mV
-	    double vti = -50.4;	//mV
-	    //#vtrest = vti + 5 * DeltaT
-	    double vtrest = -45;	//mV
-	    double VTmax = 18;	//mV
-	    double tauvt = 50;	//ms
-
-	    double tauw = 144;	//ms
-	    double c = 4;	//ns
-	    double b = 0.805;	//nA
-	    double Vr = -70.6;	//mV*/
 	    
 	    /*eqs_neuron = """
         dvm/dt=(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C : volt
@@ -174,15 +120,11 @@ int main(void){
 	    neurons = (Neuron*)malloc(sizeof(Neuron)*(N_Group_T));
 	    for(int i = 0; i<N_Group_T; i++){				// Initiliazation of Neurons
 	    	neurons[i].vt = vtrest;
-	    	neurons[i].vm = EL; //vtrest + 0.005;//EL;
+	    	neurons[i].vm = vtrest + 0.005;//EL;
 	    	neurons[i].I = 0;
 	    	neurons[i].x = 0;
 	    	neurons[i].Spike = 0;
 	    }
-	    /*printf("neurons->vm\n");
-	    for(int i=0; i<N_T; i++){
-	    	printf("%lf\n",neurons[i].vm);
-	    }*/
 
 	    int *SpikeArray;
 	    SpikeArray = (int*)malloc(sizeof(int)*(N_Group_T+N_S));
@@ -227,10 +169,11 @@ int main(void){
 	    // Initialization of Synapses for Neurons
 	    for(int i = 0; i < N_Group_S; i++){
 	    	for(int j = 0; j < N_Group_T; j++){
-	    		syn[i][j].conn = 0;	// all connected
+	    		syn[i][j].conn = 1;	// all connected
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
+	    		syn[i][j].u = 1;	// for testing
 	    		syn[i][j].U = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
 	    		syn[i][j].A = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    	}
@@ -290,7 +233,7 @@ int main(void){
 			}
 			*/
 			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
-			if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
+			/*if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
 			else SpikeArray[25+N_Group_T] = 0;
 			
 			if(t == 0) SpikeArray[46+N_Group_T] = 1;
@@ -337,7 +280,7 @@ int main(void){
 			else SpikeArray[21+N_Group_T] = 0;
 
 			if(t == 14) SpikeArray[77+N_Group_T] = 1;
-			else SpikeArray[77+N_Group_T] = 0;
+			else SpikeArray[77+N_Group_T] = 0;*/
 
 
 			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
