@@ -14,7 +14,7 @@ double tuae = 2 * 1e-3; //ms
 double Fon = 50; //Hz
 double Foff = 3; //Hz
 
-double s = 500000;//100*1e-10; 
+double s = 100 * 1e-10;//100*1e-10; 
 double Amax = 2.0;
 double Amin = 0;
 double Ainit = 0.1;
@@ -62,6 +62,10 @@ double Vr = -70.6*1e-3;	//mV
 
 int main(void){
 
+	FILE *f = fopen("Spikes.txt", "w");
+	FILE *g = fopen("Neurons_I.txt", "w");
+	FILE *h = fopen("array_A.txt", "w");
+
 	int nruns = 1;
 
 	for(int nrun = 0; nrun < nruns; nrun++){
@@ -71,10 +75,10 @@ int main(void){
 
 		double resolution_export = 10 * 1e-3; //every x ms
 
-		int N = 10;
-		int N_S = 0;//100;
-		int N_Group_S = N;
-		int N_Group_T = N;	//for the simulation we have, normaly is N
+		int N = 100;
+		int N_S = N;//100;
+		int N_Group_S = 0;
+		int N_Group_T = 1;	//for the simulation we have, normaly is N
 	    
 	    /*eqs_neuron = """
         dvm/dt=(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C : volt
@@ -120,7 +124,7 @@ int main(void){
 	    neurons = (Neuron*)malloc(sizeof(Neuron)*(N_Group_T));
 	    for(int i = 0; i<N_Group_T; i++){				// Initiliazation of Neurons
 	    	neurons[i].vt = vtrest;
-	    	neurons[i].vm = vtrest + 0.005;//EL;
+	    	neurons[i].vm = EL;//vtrest + 0.005;//EL;
 	    	neurons[i].I = 0;
 	    	neurons[i].x = 0;
 	    	neurons[i].Spike = 0;
@@ -173,7 +177,7 @@ int main(void){
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
-	    		syn[i][j].u = 1;	// for testing
+	    		//syn[i][j].u = 1;	// for testing
 	    		syn[i][j].U = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
 	    		syn[i][j].A = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    	}
@@ -224,6 +228,11 @@ int main(void){
 		for(int t = 0; t < timesteps; t++){			//add monitors for the variables we care about
 			printf("t: %.20lf----------------------------------------------------------------------------------------\n",t*defaultclock_dt);
 			print_neurons(neurons, N_Group_T);
+			fprintf(g, "t: %.3lf\n", t*defaultclock_dt);
+			for(int i = 0; i < N_Group_T; i++){
+				fprintf(g,"%.8e ",neurons[i].I);
+			}
+			fprintf(g, "\n");
 			SolveNeurons(neurons, N_Group_T, SpikeArray);	// maybe should bring the for inside out for(int i =0; i < N_T; i++) SolveNeuron(neurons[i],Spikearray[i]);
 			printf("After SolveNeurons, t: %lf\n",t*defaultclock_dt);
 			print_neurons(neurons, N_Group_T);
@@ -233,7 +242,7 @@ int main(void){
 			}
 			*/
 			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
-			/*if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
+			if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
 			else SpikeArray[25+N_Group_T] = 0;
 			
 			if(t == 0) SpikeArray[46+N_Group_T] = 1;
@@ -280,7 +289,7 @@ int main(void){
 			else SpikeArray[21+N_Group_T] = 0;
 
 			if(t == 14) SpikeArray[77+N_Group_T] = 1;
-			else SpikeArray[77+N_Group_T] = 0;*/
+			else SpikeArray[77+N_Group_T] = 0;
 
 
 			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
@@ -291,20 +300,58 @@ int main(void){
 
 			if(t*defaultclock_dt == 0.003) SpikeArray[1+N_Group_S] = 1;
 			else SpikeArray[1+N_Group_S] = 0;*/
-
+			int flag = 0;
 			printf("SpikeArray\n");
 			for(int i = 0; i < N_Group_T+N_S; i++){
+				if(SpikeArray[i]==1)flag=1;
 				printf("%d, ",SpikeArray[i]);
 			}
-
+			fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
+			for(int i = 0; i < N_Group_T; i++){
+				if(SpikeArray[i]!=0){
+					fprintf(f,"%d ",i);
+				}
+			}
+			fprintf(f, "\n");
+			//if(N_S>0){
+				fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
+				for(int i = N_Group_T; i < N_S; i++){
+					if(SpikeArray[i]!=0){
+						fprintf(f,"%d ",i-N_Group_T);
+					}
+				}
+				fprintf(f, "\n");
+			//}
 			printf("\nSynapses//////////////////////////////////////////////////////\n");
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
 			print_synapses(syn,N_S+N_Group_S,N_Group_T);
+			if(flag==1){
+				fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
+				for(int i =0; i < N_S+N_Group_S; i++){
+					for(int j = 0; j < N_Group_T; j++){
+						fprintf(h,"%.8e ", syn[i][j].A);	
+						//if((i*N_T+j+1)%4 == 0) printf("\n");
+					}
+					//printf("\n");
+				}
+				fprintf(h, "\n");
+			}
 			UpdateSynapses_pre(syn, neurons, N_S, N_Group_S, N_Group_T, SpikeArray, t*defaultclock_dt);
 			printf("\n\n\nSynapses after pre update, t: %lf\n\n\n",t*defaultclock_dt);
 			
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
 			print_synapses(syn,N_S+N_Group_S,N_Group_T);
+			if(flag==1){
+				fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
+				for(int i =0; i < N_S+N_Group_S; i++){
+					for(int j = 0; j < N_Group_T; j++){
+						fprintf(h,"%.8e ", syn[i][j].A);	
+						//if((i*N_T+j+1)%4 == 0) printf("\n");
+					}
+					//printf("\n");
+				}
+				fprintf(h, "\n");
+			}
 			fflush(stdout);
 			UpdateSynapses_post(syn, N_S, N_Group_S, N_Group_T, SpikeArray, t*defaultclock_dt);
 			printf("\n\n\nSynapses after post update, t: %lf\n\n\n",t*defaultclock_dt);
@@ -313,5 +360,8 @@ int main(void){
 			print_neurons(neurons, N_Group_T);
 		}
 	}
+	fclose(f);
+	fclose(g);
+	fclose(h);
 	return 0;
 }
