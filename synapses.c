@@ -132,20 +132,20 @@ void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_Group_S, int N_Group
 				//fflush(stdout);
 	            if (Synapses[j][i].conn){
 	            	Synapses[j][i].A = Synapses[j][i].A + etaA * (AFFp * Synapses[j][i].FFp * Synapses[j][i].FBn);
-	                double mean = 0;
+	                long double mean = 0;
 	                int num = 0;
 	                for (int k=0; k<N_S+N_Group_S; k++){
 	                    for (int l=0; l<N_Group_T; l++){
 	                        //auto edw to if boroume na to apofigoume an arxikopoioume tis metablites tou struct sto 0
 	                        //if (Synapses[k][l].conn && (SpikeArray[k] || SpikeArray[l])){
-	                    	if (Synapses[k][l].conn){
+	                    	if (Synapses[k][l].conn && SpikeArray[l]){
 	                            mean += AFFp * Synapses[k][l].FFp * Synapses[k][l].FBn;
 	                            num++;
 	                        }
 	                    }
 	                }
-	                mean = (double)mean / num;
-	                printf("mean = %lf",mean);
+	                mean = (double)mean / (double)num;
+	                printf("mean = %Le",mean);
 	                Synapses[j][i].A = Synapses[j][i].A - etaA * 0.5 * mean; //amfibola swsto, sigoura mi apodotiko
 	                if (Synapses[j][i].A < Amin) Synapses[j][i].A = Amin;
 	                else if (Synapses[j][i].A > Amax) Synapses[j][i].A = Amax;
