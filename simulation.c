@@ -242,7 +242,7 @@ int main(void){
 			}
 			*/
 			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
-			if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
+			/*if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
 			else SpikeArray[25+N_Group_T] = 0;
 			
 			if(t == 0) SpikeArray[46+N_Group_T] = 1;
@@ -289,7 +289,7 @@ int main(void){
 			else SpikeArray[21+N_Group_T] = 0;
 
 			if(t == 14) SpikeArray[77+N_Group_T] = 1;
-			else SpikeArray[77+N_Group_T] = 0;
+			else SpikeArray[77+N_Group_T] = 0;*/
 
 
 			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
