@@ -15,7 +15,7 @@ double Fon = 50; //Hz
 double Foff = 3; //Hz
 
 //double s = 100 * 1e-10;//100*1e-10; 
-double s = 1000000;	//for testing
+double s = 500000;	//for testing
 double Amax = 2.0;
 double Amin = 0;
 double Ainit = 0.1;
@@ -71,12 +71,12 @@ int main(void){
 
 	for(int nrun = 0; nrun < nruns; nrun++){
 		double realtime = 0;
-		double stime = 0.5; //second
+		double stime = 0.015; //second
 		double stime2 = 50; //second
 
 		double resolution_export = 10 * 1e-3; //every x ms
 
-		int N = 300;
+		int N = 150;
 		int N_S = 0;//100;
 		int N_Group_S = N;
 		int N_Group_T = N;	//for the simulation we have, normaly is N
@@ -303,11 +303,18 @@ int main(void){
 			if(t*defaultclock_dt == 0.003) SpikeArray[1+N_Group_S] = 1;
 			else SpikeArray[1+N_Group_S] = 0;*/
 			int flag = 0;
-			/*printf("SpikeArray\n");
+			//printf("SpikeArray\n");
 			for(int i = 0; i < N_Group_T+N_S; i++){
 				if(SpikeArray[i]==1)flag=1;
-				printf("%d, ",SpikeArray[i]);
-			}*/
+				//printf("%d, ",SpikeArray[i]);
+			}
+			if(N_S>0)fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
+			for(int i = N_Group_T; i < N_S; i++){
+				if(SpikeArray[i]!=0){
+					fprintf(f,"%d ",i-N_Group_T);
+				}
+			}
+			if(N_S>0) fprintf(f, "\n");
 			fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
 			for(int i = 0; i < N_Group_T; i++){
 				if(SpikeArray[i]!=0){
@@ -316,13 +323,7 @@ int main(void){
 			}
 			fprintf(f, "\n");
 			//if(N_S>0){
-			if(N_S>0)fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
-			for(int i = N_Group_T; i < N_S; i++){
-				if(SpikeArray[i]!=0){
-					fprintf(f,"%d ",i-N_Group_T);
-				}
-			}
-			if(N_S>0) fprintf(f, "\n");
+			
 			//}
 			printf("\nSynapses//////////////////////////////////////////////////////\n");
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
