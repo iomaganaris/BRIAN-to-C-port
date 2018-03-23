@@ -6,6 +6,11 @@
 //#include "neuron.h"
 #include "synapses.h"
 
+
+//#define NxM
+#define MxM
+//#define NxMxM	//not working probably
+
 double defaultclock_dt = 1*1e-3;	//ms
 
 //double taum_S = 10 * 1e-3; //ms
@@ -14,8 +19,12 @@ double tuae = 2 * 1e-3; //ms
 double Fon = 50; //Hz
 double Foff = 3; //Hz
 
-//double s = 100 * 1e-10;//100*1e-10; 
-double s = 500000;	//for testing
+#ifdef NxM 
+	double s = 100 * 1e-10;//100*1e-10; 
+#endif
+#ifdef MxM 
+	double s = 500000;	//for testing
+#endif
 double Amax = 2.0;
 double Amin = 0;
 double Ainit = 0.1;
@@ -71,16 +80,32 @@ int main(void){
 
 	for(int nrun = 0; nrun < nruns; nrun++){
 		double realtime = 0;
-		double stime = 0.015; //second
+		double stime = 0.1; //second
 		double stime2 = 50; //second
 
 		double resolution_export = 10 * 1e-3; //every x ms
 
-		int N = 150;
-		int N_S = 0;//100;
-		int N_Group_S = N;
-		int N_Group_T = N;	//for the simulation we have, normaly is N
-	    
+		int N = 100;
+		#ifdef MxM
+			N = 0;
+		#endif
+		int M = 10;
+
+		int N_S;//100;
+		int N_Group_S;
+		int N_Group_T;
+
+		#ifdef NxM
+			N_S = N;//100;
+			N_Group_S = 0;
+			N_Group_T = M;	//for the simulation we have, normaly is N
+	    #endif
+
+		#ifdef MxM
+			N_S = 0;//100;
+			N_Group_S = M;
+			N_Group_T = M;	//for the simulation we have, normaly is N
+		#endif
 	    /*eqs_neuron = """
         dvm/dt=(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C : volt
         dvt/dt=-(vt-vtrest)/tauvt : volt
@@ -125,7 +150,12 @@ int main(void){
 	    neurons = (Neuron*)malloc(sizeof(Neuron)*(N_Group_T));
 	    for(int i = 0; i<N_Group_T; i++){				// Initiliazation of Neurons
 	    	neurons[i].vt = vtrest;
-	    	neurons[i].vm = vtrest + 0.005;//EL;
+	    	#ifdef NxM
+	    		neurons[i].vm = EL;
+	    	#endif
+	    	#ifdef MxM
+				neurons[i].vm = vtrest + 0.005;//EL;
+			#endif
 	    	//if(i%2==1) neurons[i].vm = vtrest + 0.005;
 	    	neurons[i].I = 0;
 	    	neurons[i].x = 0;
@@ -179,9 +209,13 @@ int main(void){
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
-	    		syn[i][j].u = 1;	// for testing
+	    		#ifdef MxM
+	    			syn[i][j].u = 1;	// for testing
+	    		#endif
 	    		syn[i][j].U = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
 	    		syn[i][j].A = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+	    		//syn[i][j].U = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+	    		//syn[i][j].A = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    	}
 	    }
 	    // Initialization of Synapses for external input (bottom rows)
@@ -191,8 +225,10 @@ int main(void){
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
-	    		syn[i][j].U = exp(-(((pow((((i-N_Group_S)*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		syn[i][j].A = exp(-(((pow((((i-N_Group_S)*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+	    		//syn[i][j].U = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+	    		//syn[i][j].A = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+	    		syn[i][j].U = exp(-(((pow((((i-N_Group_S))+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+	    		syn[i][j].A = exp(-(((pow((((i-N_Group_S))+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    	}
 		}
 	    // Initialization of Synapses for external input ( right columns)
@@ -244,54 +280,56 @@ int main(void){
 			}
 			*/
 			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
-			/*if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
-			else SpikeArray[25+N_Group_T] = 0;
-			
-			if(t == 0) SpikeArray[46+N_Group_T] = 1;
-			else SpikeArray[46+N_Group_T] = 0;
+			#ifdef NxM
+				if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
+				else SpikeArray[25+N_Group_T] = 0;
+				
+				if(t == 0) SpikeArray[46+N_Group_T] = 1;
+				else SpikeArray[46+N_Group_T] = 0;
 
-			//if(t*defaultclock_dt == 0.001) SpikeArray[25+N_Group_S] = 1;
-			//else SpikeArray[25+N_Group_S] = 0;
+				//if(t*defaultclock_dt == 0.001) SpikeArray[25+N_Group_S] = 1;
+				//else SpikeArray[25+N_Group_S] = 0;
 
-			if(t == 2) SpikeArray[24+N_Group_T] = 1;
-			else SpikeArray[24+N_Group_T] = 0;
+				if(t == 2) SpikeArray[24+N_Group_T] = 1;
+				else SpikeArray[24+N_Group_T] = 0;
 
-			if(t == 2 || t == 13) SpikeArray[31+N_Group_T] = 1;
-			else SpikeArray[31+N_Group_T] = 0;
-
-
-			if(t == 5) SpikeArray[28+N_Group_T] = 1;
-			else SpikeArray[28+N_Group_T] = 0;
-
-			if(t == 6 || t == 7) SpikeArray[22+N_Group_T] = 1;
-			else SpikeArray[22+N_Group_T] = 0;
-
-			if(t == 8){
-				SpikeArray[23+N_Group_T] = 1;
-				SpikeArray[26+N_Group_T] = 1;
-				SpikeArray[35+N_Group_T] = 1;
-			} 
-			else {
-				SpikeArray[23+N_Group_T] = 0;
-				SpikeArray[26+N_Group_T] = 0;
-				SpikeArray[35+N_Group_T] = 0;
-			}
-
-			if(t == 9) SpikeArray[19+N_Group_T] = 1;
-			else SpikeArray[19+N_Group_T] = 0;
-
-			if(t == 11) SpikeArray[68+N_Group_T] = 1;
-			else SpikeArray[68+N_Group_T] = 0;
-
-			if(t == 12) SpikeArray[32+N_Group_T] = 1;
-			else SpikeArray[32+N_Group_T] = 0;
+				if(t == 2 || t == 13) SpikeArray[31+N_Group_T] = 1;
+				else SpikeArray[31+N_Group_T] = 0;
 
 
-			if(t == 14) SpikeArray[21+N_Group_T] = 1;
-			else SpikeArray[21+N_Group_T] = 0;
+				if(t == 5) SpikeArray[28+N_Group_T] = 1;
+				else SpikeArray[28+N_Group_T] = 0;
 
-			if(t == 14) SpikeArray[77+N_Group_T] = 1;
-			else SpikeArray[77+N_Group_T] = 0;*/
+				if(t == 6 || t == 7) SpikeArray[22+N_Group_T] = 1;
+				else SpikeArray[22+N_Group_T] = 0;
+
+				if(t == 8){
+					SpikeArray[23+N_Group_T] = 1;
+					SpikeArray[26+N_Group_T] = 1;
+					SpikeArray[35+N_Group_T] = 1;
+				} 
+				else {
+					SpikeArray[23+N_Group_T] = 0;
+					SpikeArray[26+N_Group_T] = 0;
+					SpikeArray[35+N_Group_T] = 0;
+				}
+
+				if(t == 9) SpikeArray[19+N_Group_T] = 1;
+				else SpikeArray[19+N_Group_T] = 0;
+
+				if(t == 11) SpikeArray[68+N_Group_T] = 1;
+				else SpikeArray[68+N_Group_T] = 0;
+
+				if(t == 12) SpikeArray[32+N_Group_T] = 1;
+				else SpikeArray[32+N_Group_T] = 0;
+
+
+				if(t == 14) SpikeArray[21+N_Group_T] = 1;
+				else SpikeArray[21+N_Group_T] = 0;
+
+				if(t == 14) SpikeArray[77+N_Group_T] = 1;
+				else SpikeArray[77+N_Group_T] = 0;
+			#endif
 
 
 			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
