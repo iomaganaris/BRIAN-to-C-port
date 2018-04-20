@@ -7,8 +7,8 @@
 #include "synapses.h"
 
 
-//#define NxM
-#define MxM
+#define NxM
+//#define MxM
 //#define NxMxM	//not working probably
 
 double defaultclock_dt = 1*1e-3;	//ms
@@ -75,7 +75,8 @@ int main(void){
 	FILE *f = fopen("Spikes.txt", "w");
 	FILE *g = fopen("Neurons_I.txt", "w");
 	FILE *h = fopen("array_A.txt", "w");
-
+//neofytou connectivity testing
+	FILE *in = fopen("connections.txt", "r");
 	int nruns = 1;
 
 	for(int nrun = 0; nrun < nruns; nrun++){
@@ -89,7 +90,7 @@ int main(void){
 		#ifdef MxM
 			N = 0;
 		#endif
-		int M = 10;
+		int M = 1;
 
 		int N_S;//100;
 		int N_Group_S;
@@ -98,13 +99,13 @@ int main(void){
 		#ifdef NxM
 			N_S = N;//100;
 			N_Group_S = 0;
-			N_Group_T = M;	//for the simulation we have, normaly is N
-	    #endif
+			N_Group_T = M;	//for the simulation we have, normally is N
+	    	#endif
 
 		#ifdef MxM
 			N_S = 0;//100;
 			N_Group_S = M;
-			N_Group_T = M;	//for the simulation we have, normaly is N
+			N_Group_T = M;	//for the simulation we have, normally is N
 		#endif
 	    /*eqs_neuron = """
         dvm/dt=(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C : volt
@@ -113,8 +114,8 @@ int main(void){
         I : amp
     	"""*/
 
-    	double input1_pos = 25;
-    	double input2_pos = 75;
+    		double input1_pos = 25;
+    		double input2_pos = 75;
 		double rad = 5;
 
 	    //Define input 1
@@ -183,6 +184,26 @@ int main(void){
 	    Synapse *syn[N_S+N_Group_S];
 	    for(int i = 0; i < N_S+N_Group_S; i++) syn[i] = (Synapse*)malloc(sizeof(Synapse) * (N_Group_T));
 
+//neofytou connectivity
+	    int con = 0;
+	       
+	    for(int i = 0; i < N_Group_S; i++){
+	    	for(int j = 0; j < N_Group_T; j++){ 
+			fscanf (in, "%d", &con);
+      	   		if (con == 1) syn[i][j].conn = 1;
+			else syn[i][j].conn = 0; 
+		}    
+    	    }
+
+	    for(int i = N_Group_S; i < N_Group_S+N_S; i++){
+	    	for(int j = 0; j < N_Group_T; j++){ 
+			fscanf (in, "%d", &con);
+      	   		if (con == 1) syn[i][j].conn = 1;
+			else syn[i][j].conn = 0; 
+		}    
+    	    }
+		
+
 	    //Synapse syn[N_S][N_T] = CreateSynapses(input, neurons);	//2D Array of synapses. Each element/synapse has it's variables embedded.
 	    												//Must find a way to describe how they are connected
 	    //syn.connect_one_to_one(input, neurons)
@@ -205,7 +226,9 @@ int main(void){
 	    // Initialization of Synapses for Neurons
 	    for(int i = 0; i < N_Group_S; i++){
 	    	for(int j = 0; j < N_Group_T; j++){
-	    		syn[i][j].conn = 1;	// all connected
+		    if (syn[i][j].conn) {
+	    		//syn[i][j].conn = 1;	// all connected
+//neofytou connectivity, arxika kanoume tis arxikopoiiseis kai sta oxi connected synapses
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
@@ -216,12 +239,15 @@ int main(void){
 	    		syn[i][j].A = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    		//syn[i][j].U = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
 	    		//syn[i][j].A = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+		    }
 	    	}
 	    }
 	    // Initialization of Synapses for external input (bottom rows)
-		for(int i = N_Group_S; i < N_Group_S+N_S; i++){
-			for(int j = 0; j < N_Group_T; j++){
-		    	syn[i][j].conn = 1;	// all connected
+	    for(int i = N_Group_S; i < N_Group_S+N_S; i++){
+	        for(int j = 0; j < N_Group_T; j++){
+		    if (syn[i][j].conn) {
+//neofytou connectivity
+		    	//syn[i][j].conn = 1;	// all connected
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
@@ -229,8 +255,9 @@ int main(void){
 	    		//syn[i][j].A = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 	    		syn[i][j].U = exp(-(((pow((((i-N_Group_S))+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
 	    		syn[i][j].A = exp(-(((pow((((i-N_Group_S))+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-	    	}
-		}
+		     }
+	         }
+	     }
 	    // Initialization of Synapses for external input ( right columns)
 	    /*for(int i = 0; i < N_S + N_Group_S; i++){
 		    for(int j = N_Group_T; j < N_Group_T+N_S; j++){
@@ -250,7 +277,6 @@ int main(void){
 	    	}
 	    	printf("\n");
 	    }
-
 	    printf("A:\n");
 	    for(int i = 0 ; i < N_S+1; i++){
 	    	for(int j = 0; j < N_T+1; j++){
@@ -281,71 +307,95 @@ int main(void){
 			*/
 			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
 			#ifdef NxM
-				if(t == 0 || t == 1) SpikeArray[25+N_Group_T] = 1;
-				else SpikeArray[25+N_Group_T] = 0;
+				//if(t == 0 ) SpikeArray[89+N_Group_T] = 1;
+				//else SpikeArray[89+N_Group_T] = 0;
 				
-				if(t == 0) SpikeArray[46+N_Group_T] = 1;
-				else SpikeArray[46+N_Group_T] = 0;
+				//if(t == 2 || t == 25) SpikeArray[73+N_Group_T] = 1;
+				//else SpikeArray[73+N_Group_T] = 0;
 
 				//if(t*defaultclock_dt == 0.001) SpikeArray[25+N_Group_S] = 1;
 				//else SpikeArray[25+N_Group_S] = 0;
 
-				if(t == 2) SpikeArray[24+N_Group_T] = 1;
-				else SpikeArray[24+N_Group_T] = 0;
-
-				if(t == 2 || t == 13) SpikeArray[31+N_Group_T] = 1;
-				else SpikeArray[31+N_Group_T] = 0;
-
-
-				if(t == 5) SpikeArray[28+N_Group_T] = 1;
-				else SpikeArray[28+N_Group_T] = 0;
-
-				if(t == 6 || t == 7) SpikeArray[22+N_Group_T] = 1;
-				else SpikeArray[22+N_Group_T] = 0;
-
-				if(t == 8){
-					SpikeArray[23+N_Group_T] = 1;
-					SpikeArray[26+N_Group_T] = 1;
-					SpikeArray[35+N_Group_T] = 1;
+				if(t == 4) SpikeArray[23+N_Group_T] = 1;
+				else SpikeArray[23+N_Group_T] = 0;
+				
+				if(t == 5){
+					SpikeArray[20+N_Group_T] = 1;
+					SpikeArray[45+N_Group_T] = 1;
+					
 				} 
 				else {
-					SpikeArray[23+N_Group_T] = 0;
-					SpikeArray[26+N_Group_T] = 0;
-					SpikeArray[35+N_Group_T] = 0;
+					SpikeArray[20+N_Group_T] = 0;
+					SpikeArray[45+N_Group_T] = 0;
+					
 				}
 
-				if(t == 9) SpikeArray[19+N_Group_T] = 1;
-				else SpikeArray[19+N_Group_T] = 0;
+				//if(t == 6 ) SpikeArray[81+N_Group_T] = 1;
+				//else SpikeArray[81+N_Group_T] = 0;
+				
+				if(t == 7 ) SpikeArray[7+N_Group_T] = 1;
+				else SpikeArray[7+N_Group_T] = 0;
+				
+				if(t == 7 || t == 11 || t == 13 || t == 20 || t == 26 || t == 28 || t == 31) SpikeArray[27+N_Group_T] = 1;
+				else SpikeArray[27+N_Group_T] = 0;
 
-				if(t == 11) SpikeArray[68+N_Group_T] = 1;
-				else SpikeArray[68+N_Group_T] = 0;
-
-				if(t == 12) SpikeArray[32+N_Group_T] = 1;
+				if(t == 9 ) SpikeArray[25+N_Group_T] = 1;
+				else SpikeArray[25+N_Group_T] = 0;
+				
+				if(t == 11 ) SpikeArray[11+N_Group_T] = 1;
+				else SpikeArray[11+N_Group_T] = 0;
+				
+				if(t == 15 ) SpikeArray[29+N_Group_T] = 1;
+				else SpikeArray[29+N_Group_T] = 0;
+				
+				if(t == 19 ) SpikeArray[32+N_Group_T] = 1;
 				else SpikeArray[32+N_Group_T] = 0;
-
-
-				if(t == 14) SpikeArray[21+N_Group_T] = 1;
-				else SpikeArray[21+N_Group_T] = 0;
-
-				if(t == 14) SpikeArray[77+N_Group_T] = 1;
-				else SpikeArray[77+N_Group_T] = 0;
+				
+				if(t == 25){
+					SpikeArray[41+N_Group_T] = 1;
+					//SpikeArray[73+N_Group_T] = 1;
+					
+				} 
+				else {
+					SpikeArray[41+N_Group_T] = 0;
+					//SpikeArray[73+N_Group_T] = 0;
+					
+				}
+				
+				if(t == 26 ) SpikeArray[14+N_Group_T] = 1;
+				else SpikeArray[14+N_Group_T] = 0;
+				
+				if(t == 28 || t == 30 ) SpikeArray[22+N_Group_T] = 1;
+				else SpikeArray[22+N_Group_T] = 0;
+				
+				if(t == 28 ) SpikeArray[31+N_Group_T] = 1;
+				else SpikeArray[31+N_Group_T] = 0;
+				
+				if(t == 29 ) SpikeArray[24+N_Group_T] = 1;
+				else SpikeArray[24+N_Group_T] = 0;
+				
 			#endif
 
 
 			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
 			else SpikeArray[6+N_Group_S] = 0;
-
 			if(t*defaultclock_dt == 0.002) SpikeArray[8+N_Group_S] = 1;
 			else SpikeArray[8+N_Group_S] = 0;
-
 			if(t*defaultclock_dt == 0.003) SpikeArray[1+N_Group_S] = 1;
 			else SpikeArray[1+N_Group_S] = 0;*/
 			int flag = 0;
 			//printf("SpikeArray\n");
 			for(int i = 0; i < N_Group_T+N_S; i++){
-				if(SpikeArray[i]==1)flag=1;
+				if (SpikeArray[i]==1) flag=1;
 				//printf("%d, ",SpikeArray[i]);
 			}
+			fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
+			for(int i = 0; i < N_Group_T; i++){
+				if (SpikeArray[i]!=0){
+					fprintf(f,"%d ",i);
+				}
+			}
+			fprintf(f, "\n");
 			if(N_S>0)fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
 			for(int i = N_Group_T; i < N_S; i++){
 				if(SpikeArray[i]!=0){
@@ -353,13 +403,7 @@ int main(void){
 				}
 			}
 			if(N_S>0) fprintf(f, "\n");
-			fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
-			for(int i = 0; i < N_Group_T; i++){
-				if(SpikeArray[i]!=0){
-					fprintf(f,"%d ",i);
-				}
-			}
-			fprintf(f, "\n");
+			
 			//if(N_S>0){
 			
 			//}
@@ -370,7 +414,8 @@ int main(void){
 				fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
 				for(int i =0; i < N_S+N_Group_S; i++){
 					for(int j = 0; j < N_Group_T; j++){
-						fprintf(h,"%.8e ", syn[i][j].A);	
+//neofytou connectivity
+						if (syn[i][j].conn) fprintf(h,"%.8e ", syn[i][j].A);	
 						//if((i*N_T+j+1)%4 == 0) printf("\n");
 					}
 					//printf("\n");
@@ -389,7 +434,8 @@ int main(void){
 				fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
 				for(int i =0; i < N_S+N_Group_S; i++){
 					for(int j = 0; j < N_Group_T; j++){
-						fprintf(h,"%.8e ", syn[i][j].A);	
+//neofytou connectivity
+						if (syn[i][j].conn) fprintf(h,"%.8e ", syn[i][j].A);	
 						//if((i*N_T+j+1)%4 == 0) printf("\n");
 					}
 					//printf("\n");
@@ -407,5 +453,7 @@ int main(void){
 	fclose(f);
 	fclose(g);
 	fclose(h);
+//neofytou connectivity 
+	fclose(in);
 	return 0;
 }
