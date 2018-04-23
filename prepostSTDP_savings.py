@@ -45,14 +45,14 @@ for nrun in range(0,nruns):
     
 #neofytouchange apo 100 se 10
 
-    NxM = 0
-    MxM = 1
+    NxM = 1
+    MxM = 0
     NxMxM = 0
 
-    N = 0
+    N = 100
     if MxM:
         N = 0
-    M = 10
+    M = 1
 
 
     taum = 10 * ms
@@ -139,9 +139,9 @@ for nrun in range(0,nruns):
         arrayN[i] = i
 
     F = 200 * Hz
-    #input = PoissonGroup(N, rates=F_input1)
+    #poissoninput = PoissonGroup(N, rates=F_input1)
     #input2 = PoissonGroup(N, rates=F_input2)
-    print 'PoissonGroup done'
+    #print 'PoissonGroup done'
     neurons = NeuronGroup(M, model=eqs_neuron, threshold='vm>vt', reset="vm=Vr;x+=b;vt=VTmax", freeze = True)
     neurons.vt = vtrest# - 26 * mV
     if NxM:
@@ -185,8 +185,9 @@ for nrun in range(0,nruns):
     #spiketimes = [(arrayN, 1 * ms), (arrayN,  4 * ms), (arrayN, 7 * ms), (arrayN, 10 * ms), (arrayN, 13 * ms), (arrayN, 16 * ms), (arrayN, 19 * ms)]
 
     if NxM or NxMxM:
-        spiketimes = [([25, 46], 0 * ms), (25, 1 * ms), ([24, 31], 2 * ms), (28, 5 * ms), (22, 6 * ms), (22, 7 * ms), ([23,26,35], 8 * ms), (19, 9 * ms), (68, 11 * ms), (32, 12 * ms), (31, 13 * ms), ([21,77], 14 * ms)]
-        my_input = SpikeGeneratorGroup(N, spiketimes)
+        #spiketimes = [([25, 46], 0 * ms), (25, 1 * ms), ([24, 31], 2 * ms), (28, 5 * ms), (22, 6 * ms), (22, 7 * ms), ([23,26,35], 8 * ms), (19, 9 * ms), (68, 11 * ms), (32, 12 * ms), (31, 13 * ms), ([21,77], 14 * ms)]
+		spiketimes = [ (23, 4 * ms), ([20, 45], 5 * ms),([7, 27], 7 * ms), (25, 9 * ms), ([11, 27], 11 * ms), (27, 13 * ms), (29, 15 * ms), (32, 19 * ms), (27, 20 * ms), (41, 25 * ms), ([14, 27], 26 * ms), ([22, 27, 31], 28 * ms), (24, 29 * ms), (22, 30 * ms), (27, 31 * ms)]
+		my_input = SpikeGeneratorGroup(N, spiketimes)
 
     if NxM or NxMxM:
         syn = Synapses(my_input, neurons, model, pre='''I=s*A*R*u; 
@@ -214,7 +215,19 @@ for nrun in range(0,nruns):
     #syn.connect_one_to_one(input, neurons)
     print 'syn'
     print syn
-    syn[:,:]=True
+#neofytou testing connectivity
+    syn[:50,:] = True
+    #syn[:10,:]=True
+    #syn[10:20,:]=False
+    #syn[20:30,:]=True
+    #syn[30:40,:]=False
+    #syn[40:50,:]=True
+    #syn[50:60,:]=False
+    #syn[60:70,:]=True
+    #syn[70:80,:]=False
+    #syn[80:90,:]=True
+    #syn[90:,:]=False
+    #print syn[1,1], " ", syn[1,2], " ". syn[2,1], " ", syn[1,-1]
     syn.FBp=0
     syn.FBn=0
     syn.R=1
@@ -226,6 +239,7 @@ for nrun in range(0,nruns):
     #syn.U[:]=0.5
     print 'size(syn.U[:])'
     print size(syn.U[:])
+# need to change the initialisations for U and A , for M > 1
     if NxM or NxMxM:
         for i in range(0,size(syn.U[:])/M): #Define gaussian input     # for NxM
             for j in range(0,M):     # for NxM
