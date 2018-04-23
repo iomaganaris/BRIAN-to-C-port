@@ -1,3 +1,14 @@
+/**
+ * @file synapses.c
+ * @author Ioannis Magkanaris
+ * @author Alexandros Neofytou
+ * @date 23 April 2014
+ * @brief File containing all the functions of Synapses.
+ *
+ * It contains the function for updating the state of a synapse due to
+ * a pre- and post-synaptic event and also a function for printing all the 
+ * elements of the 2D matrix of synapses.
+ */
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>

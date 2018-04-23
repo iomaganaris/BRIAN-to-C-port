@@ -1,3 +1,13 @@
+/**
+ * @file simulation.c
+ * @author Ioannis Magkanaris
+ * @author Alexandros Neofytou
+ * @date 23 April 2018
+ * @brief Simulation main file.
+ *
+ * Contains the main function of the program, with all the initializations
+ * of the variables needed for a specific simulation.
+ */
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -10,6 +20,7 @@
 #define NxM
 //#define MxM
 //#define NxMxM	//not working probably
+//#define allconnected
 
 double defaultclock_dt = 1*1e-3;	//ms
 
@@ -90,7 +101,7 @@ int main(void){
 		#ifdef MxM
 			N = 0;
 		#endif
-		int M = 1;
+		int M = 2;
 
 		int N_S;//100;
 		int N_Group_S;
@@ -185,6 +196,7 @@ int main(void){
 	    for(int i = 0; i < N_S+N_Group_S; i++) syn[i] = (Synapse*)malloc(sizeof(Synapse) * (N_Group_T));
 
 //neofytou connectivity
+	    #ifndef allconnected
 	    int con = 0;
 	       
 	    for(int i = 0; i < N_Group_S; i++){
@@ -202,7 +214,11 @@ int main(void){
 			else syn[i][j].conn = 0; 
 		}    
     	    }
-		
+    	#else
+    	for(int i = 0; i < N_Group_S+N_S; i++)
+	    	for(int j = 0; j < N_Group_T; j++)
+	    			syn[i][j].conn = 1;
+		#endif
 
 	    //Synapse syn[N_S][N_T] = CreateSynapses(input, neurons);	//2D Array of synapses. Each element/synapse has it's variables embedded.
 	    												//Must find a way to describe how they are connected
@@ -224,6 +240,7 @@ int main(void){
 		}*/
 
 	    // Initialization of Synapses for Neurons
+    	int init_const = 0;
 	    for(int i = 0; i < N_Group_S; i++){
 	    	for(int j = 0; j < N_Group_T; j++){
 		    if (syn[i][j].conn) {
@@ -235,8 +252,9 @@ int main(void){
 	    		#ifdef MxM
 	    			syn[i][j].u = 1;	// for testing
 	    		#endif
-	    		syn[i][j].U = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		syn[i][j].A = exp(-(((pow(((i*N_Group_T+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+	    		syn[i][j].U = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+	    		syn[i][j].A = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+	    		init_const++;
 	    		//syn[i][j].U = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
 	    		//syn[i][j].A = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
 		    }
@@ -247,14 +265,17 @@ int main(void){
 	        for(int j = 0; j < N_Group_T; j++){
 		    if (syn[i][j].conn) {
 //neofytou connectivity
-		    	//syn[i][j].conn = 1;	// all connected
+		    	#ifdef allconnected
+		    		syn[i][j].conn = 1;	// all connected
+		    	#endif
 	    		syn[i][j].FBp = 0;
 	    		syn[i][j].FBn = 0;
 	    		syn[i][j].R = 1;
 	    		//syn[i][j].U = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
 	    		//syn[i][j].A = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-	    		syn[i][j].U = exp(-(((pow((((i-N_Group_S))+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		syn[i][j].A = exp(-(((pow((((i-N_Group_S))+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+	    		syn[i][j].U = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+	    		syn[i][j].A = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+		     	init_const++;
 		     }
 	         }
 	     }
@@ -410,6 +431,10 @@ int main(void){
 			printf("\nSynapses//////////////////////////////////////////////////////\n");
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T);
+			flag = 0;
+			for(int i = N_Group_T; i < N_Group_T+N_S; i++){
+				if(SpikeArray[i]==1)flag=1;
+			}
 			if(flag==1){
 				fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
 				for(int i =0; i < N_S+N_Group_S; i++){

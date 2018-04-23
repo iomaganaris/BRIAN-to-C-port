@@ -52,7 +52,7 @@ for nrun in range(0,nruns):
     N = 100
     if MxM:
         N = 0
-    M = 1
+    M = 2
 
 
     taum = 10 * ms
@@ -216,16 +216,25 @@ for nrun in range(0,nruns):
     print 'syn'
     print syn
 #neofytou testing connectivity
-    syn[:50,:] = True
-    #syn[:10,:]=True
+    #syn[50:,:] = True
+    syn[:10,:2]=True
     #syn[10:20,:]=False
-    #syn[20:30,:]=True
+    syn[20:30,:2]=True
     #syn[30:40,:]=False
-    #syn[40:50,:]=True
+    syn[40:50,:2]=True
     #syn[50:60,:]=False
-    #syn[60:70,:]=True
+    syn[60:70,:2]=True
     #syn[70:80,:]=False
-    #syn[80:90,:]=True
+    syn[80:90,:2]=True
+    #syn[90:,:]=False
+    #syn[100:110,:]=True
+    #syn[120:130,:]=True
+    #syn[30:40,:]=False
+    #syn[140:150,:]=True
+    #syn[50:60,:]=False
+    #syn[160:170,:]=True
+    #syn[70:80,:]=False
+    #syn[180:190,:]=True
     #syn[90:,:]=False
     #print syn[1,1], " ", syn[1,2], " ". syn[2,1], " ", syn[1,-1]
     syn.FBp=0
@@ -240,16 +249,17 @@ for nrun in range(0,nruns):
     print 'size(syn.U[:])'
     print size(syn.U[:])
 # need to change the initialisations for U and A , for M > 1
-    if NxM or NxMxM:
-        for i in range(0,size(syn.U[:])/M): #Define gaussian input     # for NxM
-            for j in range(0,M):     # for NxM
-                syn.U[i*M+j] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+0)**2)))*(Umax-Umin)+Umin;     # for NxM
-                syn.A[i*M+j] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+3)**2)))*(Amax-Amin)+Amin;     # for NxM
+    #if NxM or NxMxM:
+    #    for i in range(0,size(syn.U[:])/M): #Define gaussian input     # for NxM
+    #        for j in range(0,M):     # for NxM
+    #            syn.U[i*M+j] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+0)**2)))*(Umax-Umin)+Umin;     # for NxM
+    #            syn.A[i*M+j] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+3)**2)))*(Amax-Amin)+Amin;     # for NxM
 
-    if MxM:
-        for i in range(0,size(syn.U[:])): #Define gaussian input
-            syn.U[i] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+0)**2)))*(Umax-Umin)+Umin;   #for MxM
-            syn.A[i] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+3)**2)))*(Amax-Amin)+Amin;   #for MxM
+    #if MxM:
+    for i in range(0,size(syn.U[:])): #Define gaussian input
+        syn.U[i] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+0)**2)))*(Umax-Umin)+Umin;   #for MxM
+        syn.A[i] = exp(-((((i+1)-input1_pos)**2)/(2.0*(rad+3)**2)))*(Amax-Amin)+Amin;   #for MxM
+        if MxM:
             syn.u[i] = 1
                 
     print 'syn.U[0]'
