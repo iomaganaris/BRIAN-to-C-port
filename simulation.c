@@ -195,29 +195,29 @@ int main(void){
 	    Synapse *syn[N_S+N_Group_S];
 	    for(int i = 0; i < N_S+N_Group_S; i++) syn[i] = (Synapse*)malloc(sizeof(Synapse) * (N_Group_T));
 
-//neofytou connectivity
+//Connectivity
 	    #ifndef allconnected
 	    int con = 0;
 	       
 	    for(int i = 0; i < N_Group_S; i++){
 	    	for(int j = 0; j < N_Group_T; j++){ 
-			fscanf (in, "%d", &con);
-      	   		if (con == 1) syn[i][j].conn = 1;
-			else syn[i][j].conn = 0; 
-		}    
-    	    }
+				fscanf (in, "%d", &con);
+	      	   	if (con == 1) syn[i][j].conn = 1;
+				else syn[i][j].conn = 0; 
+			}    
+    	}
 
 	    for(int i = N_Group_S; i < N_Group_S+N_S; i++){
 	    	for(int j = 0; j < N_Group_T; j++){ 
-			fscanf (in, "%d", &con);
-      	   		if (con == 1) syn[i][j].conn = 1;
-			else syn[i][j].conn = 0; 
-		}    
-    	    }
+				fscanf (in, "%d", &con);
+	      	   	if (con == 1) syn[i][j].conn = 1;
+				else syn[i][j].conn = 0; 
+			}    
+    	}
     	#else
     	for(int i = 0; i < N_Group_S+N_S; i++)
 	    	for(int j = 0; j < N_Group_T; j++)
-	    			syn[i][j].conn = 1;
+	    		syn[i][j].conn = 1;
 		#endif
 
 	    //Synapse syn[N_S][N_T] = CreateSynapses(input, neurons);	//2D Array of synapses. Each element/synapse has it's variables embedded.
@@ -243,41 +243,39 @@ int main(void){
     	int init_const = 0;
 	    for(int i = 0; i < N_Group_S; i++){
 	    	for(int j = 0; j < N_Group_T; j++){
-		    if (syn[i][j].conn) {
-	    		//syn[i][j].conn = 1;	// all connected
-//neofytou connectivity, arxika kanoume tis arxikopoiiseis kai sta oxi connected synapses
-	    		syn[i][j].FBp = 0;
-	    		syn[i][j].FBn = 0;
-	    		syn[i][j].R = 1;
-	    		#ifdef MxM
-	    			syn[i][j].u = 1;	// for testing
-	    		#endif
-	    		syn[i][j].U = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		syn[i][j].A = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-	    		init_const++;
-	    		//syn[i][j].U = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		//syn[i][j].A = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-		    }
+			    if (syn[i][j].conn) {
+		    		//syn[i][j].conn = 1;	// all connected
+	//Connectivity, initialization now happens only in connected synapses.
+		    		syn[i][j].FBp = 0;
+		    		syn[i][j].FBn = 0;
+		    		syn[i][j].R = 1;
+		    		#ifdef MxM
+		    			syn[i][j].u = 1;	// for testing
+		    		#endif
+		    		syn[i][j].U = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+		    		syn[i][j].A = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+		    		init_const++;
+		    		//syn[i][j].U = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+		    		//syn[i][j].A = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+			    }
 	    	}
 	    }
 	    // Initialization of Synapses for external input (bottom rows)
 	    for(int i = N_Group_S; i < N_Group_S+N_S; i++){
 	        for(int j = 0; j < N_Group_T; j++){
-		    if (syn[i][j].conn) {
-//neofytou connectivity
-		    	#ifdef allconnected
-		    		syn[i][j].conn = 1;	// all connected
-		    	#endif
-	    		syn[i][j].FBp = 0;
-	    		syn[i][j].FBn = 0;
-	    		syn[i][j].R = 1;
-	    		//syn[i][j].U = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		//syn[i][j].A = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-	    		syn[i][j].U = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		syn[i][j].A = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-		     	init_const++;
-		     }
-	         }
+			    if (syn[i][j].conn) {
+	//neofytou connectivity
+			    	//syn[i][j].conn = 1;	// all connected
+		    		syn[i][j].FBp = 0;
+		    		syn[i][j].FBn = 0;
+		    		syn[i][j].R = 1;
+		    		//syn[i][j].U = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+		    		//syn[i][j].A = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+		    		syn[i][j].U = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+		    		syn[i][j].A = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+			     	init_const++;
+			    }
+	        }
 	     }
 	    // Initialization of Synapses for external input ( right columns)
 	    /*for(int i = 0; i < N_S + N_Group_S; i++){
