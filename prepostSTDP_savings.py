@@ -226,6 +226,7 @@ for nrun in range(0,nruns):
     syn[60:70,:2]=True
     #syn[70:80,:]=False
     syn[80:90,:2]=True
+
     #syn[90:,:]=False
     #syn[100:110,:]=True
     #syn[120:130,:]=True
