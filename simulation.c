@@ -17,8 +17,8 @@
 #include "synapses.h"
 
 
-#define NxM
-//#define MxM
+//#define NxM
+#define MxM
 //#define NxMxM	//not working probably
 //#define allconnected
 
@@ -101,7 +101,7 @@ int main(void){
 		#ifdef MxM
 			N = 0;
 		#endif
-		int M = 2;
+		int M = 10;
 
 		int N_S;//100;
 		int N_Group_S;

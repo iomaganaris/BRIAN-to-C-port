@@ -45,14 +45,14 @@ for nrun in range(0,nruns):
     
 #neofytouchange apo 100 se 10
 
-    NxM = 1
-    MxM = 0
+    NxM = 0
+    MxM = 1
     NxMxM = 0
 
     N = 100
     if MxM:
         N = 0
-    M = 2
+    M = 10
 
 
     taum = 10 * ms
@@ -216,27 +216,17 @@ for nrun in range(0,nruns):
     print 'syn'
     print syn
 #neofytou testing connectivity
+    #syn[:,:] = True #all connected
     #syn[50:,:] = True
-    syn[:10,:2]=True
+    syn[0,:]=True
     #syn[10:20,:]=False
-    syn[20:30,:2]=True
+    syn[2,:]=True
     #syn[30:40,:]=False
-    syn[40:50,:2]=True
+    syn[4,:]=True
     #syn[50:60,:]=False
-    syn[60:70,:2]=True
+    syn[6,:]=True
     #syn[70:80,:]=False
-    syn[80:90,:2]=True
-
-    #syn[90:,:]=False
-    #syn[100:110,:]=True
-    #syn[120:130,:]=True
-    #syn[30:40,:]=False
-    #syn[140:150,:]=True
-    #syn[50:60,:]=False
-    #syn[160:170,:]=True
-    #syn[70:80,:]=False
-    #syn[180:190,:]=True
-    #syn[90:,:]=False
+    syn[8,:]=True
     #print syn[1,1], " ", syn[1,2], " ". syn[2,1], " ", syn[1,-1]
     syn.FBp=0
     syn.FBn=0
