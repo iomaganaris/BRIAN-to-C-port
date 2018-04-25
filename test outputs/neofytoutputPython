@@ -1,0 +1,2759 @@
+F_input1
+[]
+0*amp/second
+(c*(vm-EL)-x)/tauw
+-(vt-vtrest)/tauvt
+(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C
+0*amp/second
+(c*(vm-EL)-x)/tauw
+-(vt-vtrest)/tauvt
+(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C
+VariableThreshold
+Magic
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+0*amp/second
+0*1.0/1.0
+(c*(vm-EL)-x)/tauw
+(4e-09*(vm+0.0706)-x)/0.14400000000000002
+-(vt-vtrest)/tauvt
+-(vt+0.045)/0.05
+(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C
+(3.0000000000000004e-08*(-0.0706-vm)+3.0000000000000004e-08*0.002*exp((vm-vt)/0.002)+I-x)/2.81e-10
+freeze
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+NonlinearStateUpdater
+['vm', 'vt', 'x', 'I']
+1
+Vt
+[-0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045]
+Vm
+[-0.04 -0.04 -0.04 -0.04 -0.04 -0.04 -0.04 -0.04 -0.04 -0.04]
+NeuronGroup done
+expr
+<_sre.SRE_Pattern object at 0x7fa6e5a52100>
+pre
+I=s*A*R*u; 
+U=clip(U+etaU*(-AFBn*FBn*FBp + AFBp*FBp*FFp),Umin,Umax);
+w=U*A;
+FFp+=1; R-=R*u; u+=U*(1-u)
+
+post
+A=A+etaA*(AFFp*FFp*FBn);
+A=A-etaA*0.5*mean(AFFp*FFp*FBn);
+A=clip(A,Amin,Amax);
+w=U*A;
+FBp+=1.;FBn+=1.
+
+lastupdate=t
+
+synapses model
+dA/dt = 0*1         /second [diffeq]
+dlastupdate/dt = 0*second/second [diffeq]
+dFBp/dt = 0*1/second [diffeq]
+dFFp/dt = 0*1/second [diffeq]
+dR/dt = 0*1/second [diffeq]
+du/dt = 0*1/second [diffeq]
+dw/dt = 0*1/second [diffeq]
+dU/dt = 0*1/second [diffeq]
+dFBn/dt = 0*1/second [diffeq]
+
+Magic
+0*1         /second
+0*second/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+0*1         /second
+0*second/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+0*1/second
+LinearStateUpdater
+['A', 'lastupdate', 'FBp', 'FFp', 'R', 'u', 'w', 'U', 'FBn']
+5
+pre_list
+['FFp=FFp*exp(-(-lastupdate + t)/tau_FFp)\nFBn=FBn*exp(-(-lastupdate + t)/tau_FBn)\nu=U + (-U + u)*exp(-(-lastupdate + t)/tau_u)\nFBp=FBp*exp(-(-lastupdate + t)/tau_FBp)\nR=(R - 1)*exp(-(-lastupdate + t)/tau_r) + 1\nI=s*A*R*u; \nU=clip(U+etaU*(-AFBn*FBn*FBp + AFBp*FBp*FFp),Umin,Umax);\nw=U*A;\nFFp+=1; R-=R*u; u+=U*(1-u)\n\nlastupdate=t\n']
+pre code
+FFp=FFp*exp(-(-lastupdate + t)/tau_FFp)
+FBn=FBn*exp(-(-lastupdate + t)/tau_FBn)
+u=U + (-U + u)*exp(-(-lastupdate + t)/tau_u)
+FBp=FBp*exp(-(-lastupdate + t)/tau_FBp)
+R=(R - 1)*exp(-(-lastupdate + t)/tau_r) + 1
+I=s*A*R*u; 
+U=clip(U+etaU*(-AFBn*FBn*FBp + AFBp*FBp*FFp),Umin,Umax);
+w=U*A;
+FFp+=1; R-=R*u; u+=U*(1-u)
+
+lastupdate=t
+
+_namespace
+{'etaU': 0.15, '_source_vm': array([-0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04,
+       -0.04]), 'clip': <function clip at 0x7fa6f648f938>, '_original_code_string': "_post_neurons = _post.data.take(_synapses)\n_perm = _post_neurons.argsort(kind='mergesort')\n_aux = _post_neurons.take(_perm)\n_flag = empty(len(_aux)+1, dtype=bool)\n_flag[0] = _flag[-1] = 1\nnot_equal(_aux[1:], _aux[:-1], _flag[1:-1])\n_F = _flag.nonzero()[0][:-1]\nlogical_not(_flag, _flag)\nwhile len(_F):\n    _u = _aux.take(_F)\n    _i = _perm.take(_F)\n    FFp[_synapses[_i]]=FFp[_synapses[_i]]*exp(-(-lastupdate[_synapses[_i]] + t)/tau_FFp)\n    FBn[_synapses[_i]]=FBn[_synapses[_i]]*exp(-(-lastupdate[_synapses[_i]] + t)/tau_FBn)\n    u[_synapses[_i]]=U[_synapses[_i]] + (-U[_synapses[_i]] + u[_synapses[_i]])*exp(-(-lastupdate[_synapses[_i]] + t)/tau_u)\n    FBp[_synapses[_i]]=FBp[_synapses[_i]]*exp(-(-lastupdate[_synapses[_i]] + t)/tau_FBp)\n    R[_synapses[_i]]=(R[_synapses[_i]] - 1)*exp(-(-lastupdate[_synapses[_i]] + t)/tau_r) + 1\n    _target_I[_u]=s*A[_synapses[_i]]*R[_synapses[_i]]*u[_synapses[_i]]; \n    U[_synapses[_i]]=clip(U[_synapses[_i]]+etaU*(-AFBn*FBn[_synapses[_i]]*FBp[_synapses[_i]] + AFBp*FBp[_synapses[_i]]*FFp[_synapses[_i]]),Umin,Umax);\n    w[_synapses[_i]]=U[_synapses[_i]]*A[_synapses[_i]];\n    FFp[_synapses[_i]]+=1; R[_synapses[_i]]-=R[_synapses[_i]]*u[_synapses[_i]]; u[_synapses[_i]]+=U[_synapses[_i]]*(1-u[_synapses[_i]])\n    \n    lastupdate[_synapses[_i]]=t\n    \n    _F += 1\n    _F = extract(_flag.take(_F), _F)\n", '_target_x': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), 'extract': <function extract at 0x7fa6f637e578>, '_target_vt': array([-0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045,
+       -0.045, -0.045]), 'nonzero': <function nonzero at 0x7fa6f648f7d0>, 'hstack': <function hstack at 0x7fa6f6449f50>, 'add': <ufunc 'add'>, 'bool': <type 'bool'>, 'take': <function take at 0x7fa6f6482e60>, 'tau_u': 50.0 * msecond, 'tau_r': 0.2 * second, '_target_I': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), 'empty': <built-in function empty>, 'tau_FBn': 32.7 * msecond, '__builtins__': {}, '_source_x': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), 'AFBn': 0.1771, 'len': <built-in function len>, 'AFBp': 0.1548, 'tau_FFp': 66.6 * msecond, 'tau_FBp': 0.2302 * second, 'unique': <function unique at 0x7fa6f63578c0>, '_target_vm': array([-0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04,
+       -0.04]), 'not_equal': <ufunc 'not_equal'>, 'logical_not': <ufunc 'logical_not'>, 'target': NeuronGroup(10, model=<NonlinearStateUpdater with 4 state variables>, threshold=VariableThreshold(threshold_state='vt', state='vm'), reset=StringReset('vm=Vr;x+=b;vt=VTmax')), '_source_I': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), '_source_vt': array([-0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045,
+       -0.045, -0.045]), 's': 500000, 'exp': <ufunc 'exp'>, 'Umin': 0, 'Umax': 1.0}
+synapses_pre
+[array([], dtype=int32), array([], dtype=int32), array([], dtype=int32), array([], dtype=int32), array([], dtype=int32), array([], dtype=int32), array([], dtype=int32), array([], dtype=int32), array([], dtype=int32), array([], dtype=int32)]
+post code
+FFp=FFp*exp(-(-lastupdate + t)/tau_FFp)
+FBn=FBn*exp(-(-lastupdate + t)/tau_FBn)
+u=U + (-U + u)*exp(-(-lastupdate + t)/tau_u)
+FBp=FBp*exp(-(-lastupdate + t)/tau_FBp)
+R=(R - 1)*exp(-(-lastupdate + t)/tau_r) + 1
+A=A+etaA*(AFFp*FFp*FBn);
+A=A-etaA*0.5*mean(AFFp*FFp*FBn);
+A=clip(A,Amin,Amax);
+w=U*A;
+FBp+=1.;FBn+=1.
+
+lastupdate=t
+
+_namespace post
+{'_source_vm': array([-0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04,
+       -0.04]), 'clip': <function clip at 0x7fa6f648f938>, '_original_code_string': '_post_neurons = _post[_synapses]\nFFp[_synapses]=FFp[_synapses]*exp(-(-lastupdate[_synapses] + t)/tau_FFp)\nFBn[_synapses]=FBn[_synapses]*exp(-(-lastupdate[_synapses] + t)/tau_FBn)\nu[_synapses]=U[_synapses] + (-U[_synapses] + u[_synapses])*exp(-(-lastupdate[_synapses] + t)/tau_u)\nFBp[_synapses]=FBp[_synapses]*exp(-(-lastupdate[_synapses] + t)/tau_FBp)\nR[_synapses]=(R[_synapses] - 1)*exp(-(-lastupdate[_synapses] + t)/tau_r) + 1\nA[_synapses]=A[_synapses]+etaA*(AFFp*FFp[_synapses]*FBn[_synapses]);\nA[_synapses]=A[_synapses]-etaA*0.5*mean(AFFp*FFp[_synapses]*FBn[_synapses]);\nA[_synapses]=clip(A[_synapses],Amin,Amax);\nw[_synapses]=U[_synapses]*A[_synapses];\nFBp[_synapses]+=1.;FBn[_synapses]+=1.\n\nlastupdate[_synapses]=t\n\nprint _synapses\nprint _post_neurons\nprint mean(AFFp*FFp[_synapses]*FBn[_synapses])\n', '_target_x': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), 'etaA': 0.15, 'extract': <function extract at 0x7fa6f637e578>, '_target_vt': array([-0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045,
+       -0.045, -0.045]), 'nonzero': <function nonzero at 0x7fa6f648f7d0>, 'hstack': <function hstack at 0x7fa6f6449f50>, 'add': <ufunc 'add'>, 'bool': <type 'bool'>, 'take': <function take at 0x7fa6f6482e60>, 'tau_u': 50.0 * msecond, 'tau_r': 0.2 * second, 'Amax': 2.0, 'empty': <built-in function empty>, 'Amin': 0, 'tau_FBn': 32.7 * msecond, '__builtins__': {}, '_source_x': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), 'len': <built-in function len>, 'tau_FFp': 66.6 * msecond, 'tau_FBp': 0.2302 * second, '_source_I': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), 'unique': <function unique at 0x7fa6f63578c0>, '_target_vm': array([-0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04, -0.04,
+       -0.04]), 'not_equal': <ufunc 'not_equal'>, 'logical_not': <ufunc 'logical_not'>, 'target': NeuronGroup(10, model=<NonlinearStateUpdater with 4 state variables>, threshold=VariableThreshold(threshold_state='vt', state='vm'), reset=StringReset('vm=Vr;x+=b;vt=VTmax')), 'AFFp': 0.0618, '_source_vt': array([-0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045, -0.045,
+       -0.045, -0.045]), 'exp': <ufunc 'exp'>, '_target_I': array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]), 'mean': <function mean at 0x7fa6f6490320>}
+_namespace post code
+_post_neurons = _post[_synapses]
+FFp[_synapses]=FFp[_synapses]*exp(-(-lastupdate[_synapses] + t)/tau_FFp)
+FBn[_synapses]=FBn[_synapses]*exp(-(-lastupdate[_synapses] + t)/tau_FBn)
+u[_synapses]=U[_synapses] + (-U[_synapses] + u[_synapses])*exp(-(-lastupdate[_synapses] + t)/tau_u)
+FBp[_synapses]=FBp[_synapses]*exp(-(-lastupdate[_synapses] + t)/tau_FBp)
+R[_synapses]=(R[_synapses] - 1)*exp(-(-lastupdate[_synapses] + t)/tau_r) + 1
+A[_synapses]=A[_synapses]+etaA*(AFFp*FFp[_synapses]*FBn[_synapses]);
+A[_synapses]=A[_synapses]-etaA*0.5*mean(AFFp*FFp[_synapses]*FBn[_synapses]);
+A[_synapses]=clip(A[_synapses],Amin,Amax);
+w[_synapses]=U[_synapses]*A[_synapses];
+FBp[_synapses]+=1.;FBn[_synapses]+=1.
+
+lastupdate[_synapses]=t
+
+print _synapses
+print _post_neurons
+print mean(AFFp*FFp[_synapses]*FBn[_synapses])
+
+syn
+Synapses of 0 neurons
+syn
+Synapses of 50 neurons
+size(syn.U[:])
+50
+syn.U[0]
+9.92950430585e-06
+Synapses done
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[-0.04066566 -0.04066566 -0.04066566 -0.04066566 -0.04066566 -0.04066566
+ -0.04066566 -0.04066566 -0.04066566 -0.04066566]
+P.state_(self.threshold_state)
+[-0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045 -0.045]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+0.0618
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[4.81620225e+11 3.72167264e+11 2.83129924e+11 2.12054515e+11
+ 1.56359194e+11 1.13504603e+11 8.11180814e+10 5.70736985e+10
+ 3.95337955e+10 2.69597062e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+0.241663140419
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[2.35481055e+09 1.81955044e+09 1.38419750e+09 1.03669923e+09
+ 7.64407955e+08 5.54898563e+08 3.96567436e+08 2.79019830e+08
+ 1.93271327e+08 1.31799578e+08]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+0.531614575632
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[2.43128335e+09 1.89615784e+09 1.46106893e+09 1.11376684e+09
+ 8.41618365e+08 6.32214757e+08 4.73962137e+08 3.56472339e+08
+ 2.70765857e+08 2.09324188e+08]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+0.924102807791
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[2.65722687e+09 2.12264093e+09 1.68778497e+09 1.34065630e+09
+ 1.06864354e+09 8.59344294e+08 7.01170520e+08 5.83739254e+08
+ 4.98075467e+08 4.36664405e+08]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+1.41197897826
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[3.10039530e+09 2.56608955e+09 2.13145449e+09 1.78450184e+09
+ 1.51262706e+09 1.30343400e+09 1.14534050e+09 1.02796883e+09
+ 9.42348519e+08 8.80968627e+08]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+1.98847713436
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[3.82285724e+09 3.28882493e+09 2.85441388e+09 2.50764034e+09
+ 2.23590601e+09 2.02682107e+09 1.86880929e+09 1.75149830e+09
+ 1.66592227e+09 1.60457412e+09]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+2.64719542654
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[4.88238359e+09 4.34862742e+09 3.91444408e+09 3.56785279e+09
+ 3.29626140e+09 3.08728652e+09 2.92935795e+09 2.81210876e+09
+ 2.72657781e+09 2.66526198e+09]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+3.38207819284
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[6.33244117e+09 5.79896419e+09 5.36501228e+09 5.01860639e+09
+ 4.74716047e+09 4.53829763e+09 4.38045377e+09 4.26326750e+09
+ 4.17778245e+09 4.11649954e+09]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+4.18739888981
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[8.22241405e+09 7.68921909e+09 7.25550232e+09 6.90928500e+09
+ 6.63798712e+09 6.42923831e+09 6.27148070e+09 6.15435848e+09
+ 6.06892017e+09 6.00767077e+09]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+5.05774383072
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.05978220e+10 1.00649116e+10 9.63143368e+09 9.28540814e+09
+ 9.01426087e+09 8.80562812e+09 8.64795829e+09 8.53090129e+09
+ 8.44551057e+09 8.38429529e+09]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+5.98799669366
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.35005285e+10 1.29679050e+10 1.25346696e+10 1.21888391e+10
+ 1.19178450e+10 1.17093304e+10 1.15517499e+10 1.14347593e+10
+ 1.13494170e+10 1.12882365e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+6.97332376397
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.69689386e+10 1.64366041e+10 1.60036149e+10 1.56579826e+10
+ 1.53871444e+10 1.51787500e+10 1.50212605e+10 1.49043374e+10
+ 1.48190445e+10 1.47578993e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+8.009159877
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.72952219e+10 1.72951314e+10 1.72951109e+10 1.72951026e+10
+ 1.72950984e+10 1.72950965e+10 1.72950956e+10 1.72950952e+10
+ 1.72950951e+10 1.72950950e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+9.09119502859
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.72848437e+10 1.72847517e+10 1.72847308e+10 1.72847223e+10
+ 1.72847181e+10 1.72847161e+10 1.72847152e+10 1.72847148e+10
+ 1.72847146e+10 1.72847146e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+10.2153616226
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.72742782e+10 1.72741845e+10 1.72741632e+10 1.72741546e+10
+ 1.72741503e+10 1.72741483e+10 1.72741473e+10 1.72741469e+10
+ 1.72741468e+10 1.72741467e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+11.3778223257
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.72635223e+10 1.72634269e+10 1.72634052e+10 1.72633964e+10
+ 1.72633920e+10 1.72633900e+10 1.72633891e+10 1.72633886e+10
+ 1.72633885e+10 1.72633884e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+12.5749585009
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.72525729e+10 1.72524758e+10 1.72524537e+10 1.72524448e+10
+ 1.72524404e+10 1.72524383e+10 1.72524373e+10 1.72524369e+10
+ 1.72524367e+10 1.72524367e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+13.8033591943
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.72414271e+10 1.72413283e+10 1.72413058e+10 1.72412967e+10
+ 1.72412922e+10 1.72412900e+10 1.72412891e+10 1.72412887e+10
+ 1.72412885e+10 1.72412884e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+15.0598106469
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.72300818e+10 1.72299812e+10 1.72299583e+10 1.72299490e+10
+ 1.72299444e+10 1.72299422e+10 1.72299413e+10 1.72299408e+10
+ 1.72299407e+10 1.72299406e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+16.34128631
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.74067113e+10 1.74067124e+10 1.74067127e+10 1.74067128e+10
+ 1.74067129e+10 1.74067129e+10 1.74067129e+10 1.74067129e+10
+ 1.74067129e+10 1.74067129e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+17.6449373379
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.80547885e+10 1.80551518e+10 1.80552345e+10 1.80552680e+10
+ 1.80552845e+10 1.80552924e+10 1.80552959e+10 1.80552975e+10
+ 1.80552981e+10 1.80552984e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+18.9680835376
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.91856379e+10 1.91866056e+10 1.91868257e+10 1.91869149e+10
+ 1.91869590e+10 1.91869799e+10 1.91869894e+10 1.91869935e+10
+ 1.91869952e+10 1.91869959e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+20.3082047537
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[2.02087501e+10 2.02101517e+10 2.02104705e+10 2.02105997e+10
+ 2.02106636e+10 2.02106938e+10 2.02107076e+10 2.02107135e+10
+ 2.02107160e+10 2.02107170e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+21.6629326677
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[2.01145338e+10 2.01156467e+10 2.01158999e+10 2.01160025e+10
+ 2.01160532e+10 2.01160772e+10 2.01160881e+10 2.01160928e+10
+ 2.01160948e+10 2.01160956e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+23.0300429925
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.88196627e+10 1.88200268e+10 1.88201096e+10 1.88201431e+10
+ 1.88201597e+10 1.88201676e+10 1.88201711e+10 1.88201727e+10
+ 1.88201733e+10 1.88201736e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+24.4074480443
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+25.7931896735
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+27.1854325377
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+28.5824577015
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+29.9826565474
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+31.3845249823
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+32.786657928
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+34.1877440792
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+35.5865609194
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+36.9819699805
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+38.3729123356
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+39.7584043133
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+41.1375334241
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+42.5094544878
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+43.8733859523
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+45.228606396
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+46.5744512037
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+47.9103094086
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+49.2356206916
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+50.5498725322
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+51.8525975008
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+53.1433706891
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+54.4218072692
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+55.6875601769
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+56.940317912
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+58.1798024513
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+59.405767268
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+60.6179954524
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+61.8162979292
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+63.0005117671
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+64.1704985753
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+65.3261429838
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+66.4673512024
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+67.594049655
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+68.7061836863
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+69.8037163357
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+70.8866271768
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+71.9549112177
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+73.0085778609
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+74.0476499183
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+75.0721626792
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+76.0821630291
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+77.077708616
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+78.0588670618
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+79.0257152186
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+79.9783384635
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+80.9168300353
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+81.8412904055
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+82.751826687
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+83.6485520745
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+84.5315853175
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+85.401050223
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+86.2570751874
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+87.0997927552
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+87.9293392033
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+88.7458541502
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+89.5494801882
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+90.3403625375
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+91.1186487215
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+91.8844882617
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+92.6380323912
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+93.3794337864
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+94.1088463152
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+94.8264248014
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+95.5323248042
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+96.2267024119
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+96.9097140493
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+97.581516298
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+98.2422657287
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+98.8921187448
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+99.5312314377
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+100.159759452
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+100.777857858
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+101.38568104
+dvm/dt = (gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C [diffeq]
+dvt/dt = -(vt-vtrest)/tauvt [diffeq]
+dx/dt = (c*(vm-EL)-x)/tauw [diffeq]
+dI/dt = 0*amp/second [diffeq]
+
+self
+NeuronGroup of 10 neurons
+Now _threshold
+P.state_(self.state)
+[1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10 1.77491844e+10 1.77491844e+10
+ 1.77491844e+10 1.77491844e+10]
+P.state_(self.threshold_state)
+[0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674 0.01674
+ 0.01674]
+[0 1 2 3 4 5 6 7 8 9]
+spikes
+[0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+(Python) In propagate: spikes =  [0 1 2 3 4 5 6 7 8 9]
+[ 0 10 20 30 40  1 11 21 31 41  2 12 22 32 42  3 13 23 33 43  4 14 24 34
+ 44  5 15 25 35 45  6 16 26 36 46  7 17 27 37 47  8 18 28 38 48  9 19 29
+ 39 49]
+[0 0 0 0 0 1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 6 6 6 6 6 7 7
+ 7 7 7 8 8 8 8 8 9 9 9 9 9]
+101.983382585
+Simulation time: 0.256556987762
