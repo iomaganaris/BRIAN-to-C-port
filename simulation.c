@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-//#include "neuron.h"
 #include "synapses.h"
 
 
@@ -125,8 +124,8 @@ int main(void){
         I : amp
     	"""*/
 
-    		double input1_pos = 25;
-    		double input2_pos = 75;
+		double input1_pos = 25;
+		double input2_pos = 75;
 		double rad = 5;
 
 	    //Define input 1
@@ -245,7 +244,7 @@ int main(void){
 	    	for(int j = 0; j < N_Group_T; j++){
 			    if (syn[i][j].conn) {
 		    		//syn[i][j].conn = 1;	// all connected
-	//Connectivity, initialization now happens only in connected synapses.
+					//Connectivity, initialization now happens only in connected synapses.
 		    		syn[i][j].FBp = 0;
 		    		syn[i][j].FBn = 0;
 		    		syn[i][j].R = 1;
@@ -264,7 +263,7 @@ int main(void){
 	    for(int i = N_Group_S; i < N_Group_S+N_S; i++){
 	        for(int j = 0; j < N_Group_T; j++){
 			    if (syn[i][j].conn) {
-	//neofytou connectivity
+					//Connectivity, initialization now happens only in connected synapses.
 			    	//syn[i][j].conn = 1;	// all connected
 		    		syn[i][j].FBp = 0;
 		    		syn[i][j].FBn = 0;
@@ -325,6 +324,8 @@ int main(void){
 			}
 			*/
 			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
+
+			// Determing when and which input dummy neurons spike for debugging
 			#ifdef NxM
 				//if(t == 0 ) SpikeArray[89+N_Group_T] = 1;
 				//else SpikeArray[89+N_Group_T] = 0;
@@ -395,13 +396,6 @@ int main(void){
 				
 			#endif
 
-
-			/*if(t*defaultclock_dt == 0.002) SpikeArray[6+N_Group_S] = 1;
-			else SpikeArray[6+N_Group_S] = 0;
-			if(t*defaultclock_dt == 0.002) SpikeArray[8+N_Group_S] = 1;
-			else SpikeArray[8+N_Group_S] = 0;
-			if(t*defaultclock_dt == 0.003) SpikeArray[1+N_Group_S] = 1;
-			else SpikeArray[1+N_Group_S] = 0;*/
 			int flag = 0;
 			//printf("SpikeArray\n");
 			for(int i = 0; i < N_Group_T+N_S; i++){
@@ -423,9 +417,6 @@ int main(void){
 			}
 			if(N_S>0) fprintf(f, "\n");
 			
-			//if(N_S>0){
-			
-			//}
 			printf("\nSynapses//////////////////////////////////////////////////////\n");
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
 			//print_synapses(syn,N_S+N_Group_S,N_Group_T);
@@ -437,7 +428,6 @@ int main(void){
 				fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
 				for(int i =0; i < N_S+N_Group_S; i++){
 					for(int j = 0; j < N_Group_T; j++){
-//neofytou connectivity
 						if (syn[i][j].conn) fprintf(h,"%.8e ", syn[i][j].A);	
 						//if((i*N_T+j+1)%4 == 0) printf("\n");
 					}
@@ -457,7 +447,6 @@ int main(void){
 				fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
 				for(int i =0; i < N_S+N_Group_S; i++){
 					for(int j = 0; j < N_Group_T; j++){
-//neofytou connectivity
 						if (syn[i][j].conn) fprintf(h,"%.8e ", syn[i][j].A);	
 						//if((i*N_T+j+1)%4 == 0) printf("\n");
 					}
@@ -476,7 +465,6 @@ int main(void){
 	fclose(f);
 	fclose(g);
 	fclose(h);
-//neofytou connectivity 
 	fclose(in);
 	return 0;
 }
