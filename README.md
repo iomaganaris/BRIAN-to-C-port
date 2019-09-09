@@ -1,8 +1,7 @@
 Implementation of a simulation of a biological neural network based on the ADEX model with pre- and post-synaptic expression of STDP in C.
 
-Doxygen documentation in /doc/html/index.html
+The Python code of *prepostSTDP_savings.py* , the script responsible for running the desired simulation in the BRIAN neural network simulator, as well as the corresponding functions of BRIAN's source code were ported into a standalone simulator for the specific models in C.
 
-Main of ported code in *simulation.c*
+Doxygen documentation can be found in /doc/html/index.html
 
-Original python code in *prepostSTDP_savings.py* is responsible for running the desired simulation in the BRIAN neural network simulator
-
+The main function of ported code is found in *simulation.c*
