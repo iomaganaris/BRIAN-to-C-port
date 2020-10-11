@@ -4,4 +4,4 @@ The Python code of *prepostSTDP_savings.py* , the script responsible for running
 
 Doxygen documentation can be found in /doc/html/index.html
 
-The main function of ported code is found in *simulation.c*
+The main function of ported code is found in *src/simulation.c*

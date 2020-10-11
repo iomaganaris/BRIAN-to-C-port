@@ -1,10 +1,9 @@
-cd /home/ioannis/Desktop/Porting
-make
+cd build 
 echo "C running"
 ./simulation > output
-cd /home/ioannis/Desktop/Diploma_Thesis/Tests/Debbuging_code
+cd .. 
 echo "python running"
 python prepostSTDP_savings.py > output
-cmp /home/ioannis/Desktop/Porting/array_A.txt /home/ioannis/Desktop/Diploma_Thesis/Tests/Debbuging_code/array_A_python.txt
-cmp /home/ioannis/Desktop/Porting/Neurons_I.txt /home/ioannis/Desktop/Diploma_Thesis/Tests/Debbuging_code/Neuron_I_python.txt
-cmp /home/ioannis/Desktop/Porting/Spikes.txt /home/ioannis/Desktop/Diploma_Thesis/Tests/Debbuging_code/spikespython.txt
+cmp build/array_A.txt array_A_python.txt
+cmp build/Neurons_I.txt Neuron_I_python.txt
+cmp build/Spikes.txt spikespython.txt
