@@ -15,90 +15,92 @@
 #include "constants.hpp"
 #include "synapses.hpp"
 
-void UpdateSynapses_pre(Synapse** Synapses, Neuron* neurons, int N_S, int N_Group_S, int N_Group_T, int* SpikeArray, double t){
-	//an baloume ekswteriki eisodo thelei i<N+1 logika
-	for (int i = 0; i < N_S + N_Group_S; i++){
-		if (SpikeArray[i+N_Group_T-N_Group_S] > 0){
-			printf("i= %d SpikeArray[i]= %d\n",i,SpikeArray[i]);
+void Synapses::init() {
+
+}
+
+void Synapses::UpdateSynapses_pre(double t){
+    auto pre_spikes = pre_neurons.get_spikes();
+    auto index = 0;
+	for (int i = 0; i < N_Group_S; i++){
+		if (pre_spikes[i] > 0){
+			printf("i= %d SpikeArray[i]= %d\n",i,pre_spikes[i]);
 			for (int j = 0; j < N_Group_T; j++){
-				//auto borei na ginei pio apodotika alla diskoleuei, gi arxi trwme xwro me ta struct synapses
-				if (Synapses[i][j].conn){
-					printf("i = %d, j = %d\n",i,j);
-					Synapses[i][j].FFp = Synapses[i][j].FFp * exp(-(-Synapses[i][j].lastupdate + t)/tau_FFp);
-					Synapses[i][j].FBn = Synapses[i][j].FBn * exp(-(-Synapses[i][j].lastupdate + t)/tau_FBn);
-					Synapses[i][j].u = Synapses[i][j].U + (-Synapses[i][j].U + Synapses[i][j].u) * exp(-(-Synapses[i][j].lastupdate + t)/tau_u);
-					Synapses[i][j].FBp = Synapses[i][j].FBp * exp(-(-Synapses[i][j].lastupdate + t)/tau_FBp);
-					Synapses[i][j].R = (Synapses[i][j].R - 1) * exp(-(-Synapses[i][j].lastupdate + t)/tau_r) + 1;
-					Synapses[i][j].target_I = s * Synapses[i][j].A * Synapses[i][j].R * Synapses[i][j].u;
-					Synapses[i][j].U = Synapses[i][j].U + etaU * (-AFBn * Synapses[i][j].FBn * Synapses[i][j].FBp + AFBp * Synapses[i][j].FBp * Synapses[i][j].FFp);
-					if (Synapses[i][j].U < Umin) Synapses[i][j].U = Umin;
-					else if (Synapses[i][j].U > Umax) Synapses[i][j].U = Umax;
-					Synapses[i][j].w = Synapses[i][j].U * Synapses[i][j].A;
-					Synapses[i][j].FFp += 1;
-					Synapses[i][j].R -= Synapses[i][j].R * Synapses[i][j].u;
-					Synapses[i][j].u += Synapses[i][j].U * (1 - Synapses[i][j].u);
-					Synapses[i][j].lastupdate = t;
-				}
+                printf("i = %d, j = %d\n",i,j);
+                index = i*N_Group_T+j;
+                FFp[index] = FFp[index] * exp(-(-lastupdate[index] + t)/tau_FFp);
+                FBn[index] = FBn[index] * exp(-(-lastupdate[index] + t)/tau_FBn);
+                u[index] = U[index] + (-U[index] + u[index]) * exp(-(-lastupdate[index] + t)/tau_u);
+                FBp[index] = FBp[index] * exp(-(-lastupdate[index] + t)/tau_FBp);
+                R[index] = (R[index] - 1) * exp(-(-lastupdate[index] + t)/tau_r) + 1;
+                target_I[index] = s * A[index] * R[index] * u[index];
+                U[index] = U[index] + etaU * (-AFBn * FBn[index] * FBp[index] + AFBp * FBp[index] * FFp[index]);
+                if (U[index] < Umin) U[index] = Umin;
+                else if (U[index] > Umax) U[index] = Umax;
+                w[index] = U[index] * A[index];
+                FFp[index] += 1;
+                R[index] -= R[index] * u[index];
+                u[index] += U[index] * (1 - u[index]);
+                lastupdate[index] = t;
 			}
 		}
 	}
-	for (int j = 0; j < N_Group_T; j++){
-		for (int i = 0; i < N_S + N_Group_S; i++){
-			if (Synapses[i][j].conn && SpikeArray[i+N_Group_T-N_Group_S]){
+
+	post_neurons.update_I(pre_spikes, target_I);
+	/* This should be done in update_I
+    for (int j = 0; j < N_Group_T; j++){
+		for (int i = 0; i < N_Group_S; i++){
+			if (pre_spikes[i]){
 				//printf("i: %d, j: %d\n",i,j);
-				neurons[j].I = Synapses[i][j].target_I;
-				printf("j: %d, neurons[j]= %lf",j,neurons[j].I);
+                post_neurons->I[j] = target_I[i*N_Group_T+j];
+				printf("j: %d, neurons[j]= %lf",j,post_neurons->I[j]);
 				//break;
 			}
 		}
-	}
+	}*/
 }
 
-void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_Group_S, int N_Group_T, int* SpikeArray, double t){
-	
+void Synapses::UpdateSynapses_post(double t){
+	auto post_spikes = post_neurons.get_spikes();
+    auto index = 0;
 	for (int i = 0; i < N_Group_T; i++){
-	    if (SpikeArray[i] > 0){		// problima me ayto an exoyme allo group me neyrwnes san source kai target kai ton kommeno pinaka
+	    if (post_spikes[i] > 0){		// problima me ayto an exoyme allo group me neyrwnes san source kai target kai ton kommeno pinaka
 	    	//printf("i= %d SpikeArray[i]= %d\n",i,SpikeArray[i]);
 	    	//fflush(stdout);
-	        for (int j = 0; j < N_S + N_Group_S; j++){
+	        for (int j = 0; j < N_Group_S; j++){
 	        	//printf("i = %d, j = %d Synapses[j][i].conn= %d\n",i,j,Synapses[j][i].conn);
 				//fflush(stdout);
-	            if (Synapses[j][i].conn){
-	            	printf("i = %d, j = %d\n",i,j);
-	            	fflush(stdout);
-	                Synapses[j][i].FFp = Synapses[j][i].FFp * exp(-(-Synapses[j][i].lastupdate + t)/tau_FFp);
-	                Synapses[j][i].FBn = Synapses[j][i].FBn * exp(-(-Synapses[j][i].lastupdate + t)/tau_FBn);
-	                Synapses[j][i].u = Synapses[j][i].U + (-Synapses[j][i].U + Synapses[j][i].u) * exp(-(-Synapses[j][i].lastupdate + t)/tau_u);
-	                Synapses[j][i].FBp = Synapses[j][i].FBp * exp(-(-Synapses[j][i].lastupdate + t)/tau_FBp);
-	                Synapses[j][i].R = (Synapses[j][i].R - 1) * exp(-(-Synapses[j][i].lastupdate + t)/tau_r) + 1;
-	                /*Synapses[j][i].A = Synapses[j][i].A + etaA * (AFFp * Synapses[j][i].FFp * Synapses[j][i].FBn);
-	                double mean = 0;
-	                int num = 0;
-	                for (int k=0; k<N_S; k++){
-	                    for (int l=0; l<N_T; l++){
-	                        //auto edw to if boroume na to apofigoume an arxikopoioume tis metablites tou struct sto 0
-	                        //if (Synapses[k][l].conn && (SpikeArray[k] || SpikeArray[l])){
-	                    	if (Synapses[k][l].conn){
-	                            mean += AFFp * Synapses[k][l].FFp * Synapses[k][l].FBn;
-	                            num++;
-	                        }
-	                    }
-	                }
-	                mean = (double)mean / num;
-	                printf("mean = %lf",mean);
-	                Synapses[j][i].A = Synapses[j][i].A - etaA * 0.5 * mean; //amfibola swsto, sigoura mi apodotiko
-	                if (Synapses[j][i].A < Amin) Synapses[j][i].A = Amin;
-	                else if (Synapses[j][i].A > Amax) Synapses[j][i].A = Amax;
-	                Synapses[j][i].w = Synapses[j][i].U * Synapses[j][i].A;
-	                Synapses[j][i].FBp += 1;
-	                Synapses[j][i].FBn += 1;*/
-
-	            }
+                printf("i = %d, j = %d\n",i,j);
+                fflush(stdout);
+                index = i+j*N_Group_T;
+                FFp[index] = FFp[index] * exp(-(-lastupdate[index] + t)/tau_FFp);
+                FBn[index] = FBn[index] * exp(-(-lastupdate[index] + t)/tau_FBn);
+                u[index] = U[index] + (-U[index] + u[index]) * exp(-(-lastupdate[index] + t)/tau_u);
+                FBp[index] = FBp[index] * exp(-(-lastupdate[index] + t)/tau_FBp);
+                R[index] = (R[index] - 1) * exp(-(-lastupdate[index] + t)/tau_r) + 1;
+                A[index] = A[index] + etaA * (AFFp * FFp[index] * FBn[index]);
+                double mean = 0;
+                for (int k=0; k<N_Group_S; k++){
+                    for (int l=0; l<N_Group_T; l++){
+                        //auto edw to if boroume na to apofigoume an arxikopoioume tis metablites tou struct sto 0
+                        //if (Synapses[k][l].conn && (SpikeArray[k] || SpikeArray[l])){
+                        mean += AFFp * FFp[index] * FBn[index];
+                    }
+                }
+                mean = (double)mean / (N_Group_S*N_Group_T);
+                printf("mean = %lf",mean);
+                A[index] = A[index] - etaA * 0.5 * mean; //amfibola swsto, sigoura mi apodotiko
+                if (A[index] < Amin) A[index] = Amin;
+                else if (A[index] > Amax) A[index] = Amax;
+                w[index] = U[index] * A[index];
+                FBp[index] += 1;
+                FBn[index] += 1;
 	        }
 	    }
 	}
+	/*
 	for (int i = 0; i < N_Group_T; i++){
-	    if (SpikeArray[i] > 0){		// problima me ayto an exoyme allo group me neyrwnes san source kai target kai ton kommeno pinaka
+	    if (post_neurons.spikes[i] > 0){		// problima me ayto an exoyme allo group me neyrwnes san source kai target kai ton kommeno pinaka
 	    	//printf("i= %d SpikeArray[i]= %d\n",i,SpikeArray[i]);
 	    	//fflush(stdout);
 	        for (int j = 0; j < N_S + N_Group_S; j++){
@@ -142,13 +144,11 @@ void UpdateSynapses_post(Synapse** Synapses, int N_S, int N_Group_S, int N_Group
 	            }
 	        }
 	    }
-	}
-
-
+	}*/
 }
 
-void print_synapses(Synapse** syn, int N_S, int N_T){
-	printf("conn\n");
+void Synapses::print_synapses(){
+	/*printf("conn\n");
 	for(int i =0; i < N_S; i++){
 		for(int j = 0; j < N_T; j++){
 			//printf("conn= %d, w= %lf, FFp= %lf, FBp= %lf, FBn= %lf, R= %lf, u= %lf, U= %lf, A= %lf, lastup= %lf, target_I= %lf\n",syn[i][j].conn,syn[i][j].w,syn[i][j].FFp,syn[i][j].FBp,syn[i][j].FBn,syn[i][j].R,syn[i][j].u,syn[i][j].U,syn[i][j].A,syn[i][j].lastupdate,syn[i][j].target_I);
@@ -156,73 +156,73 @@ void print_synapses(Synapse** syn, int N_S, int N_T){
 			//if((i*N_T+j)%4 == 0) printf("\n");
 		}
 		printf("\n");
-	}
+	}*/
 	printf("\nw\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++){
-			printf("%.8e ", syn[i][j].w);
-			if((i*N_T+j+1)%4 == 0) printf("\n");
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++){
+			printf("%.8e ", w[i*N_Group_T+j]);
+			//if((i*N_T+j+1)%4 == 0) printf("\n");
 		}
-		//printf("\n");		
+		printf("\n");
 	}
 	printf("\nFFp\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].FFp);
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++)
+			printf("%.8e, ", FFp[i*N_Group_T+j]);
 		printf("\n");	
 	}
 	printf("\nFBp\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].FBp);	
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++)
+			printf("%.8e, ", FBp[i*N_Group_T+j]);
 		printf("\n");
 	}
 	printf("\nFBn\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].FBn);
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++)
+			printf("%.8e, ", FBn[i*N_Group_T+j]);
 		printf("\n");		
 	}
 	printf("\nR\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++)
-			printf("%.8e, ", syn[i][j].R);
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++)
+			printf("%.8e, ", R[i*N_Group_T+j]);
 		printf("\n");
 	}
 	printf("\nu\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++){
-			printf("%.8e ", syn[i][j].u);
-			if((i*N_T+j+1)%4 == 0) printf("\n");
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++){
+			printf("%.8e ", u[i*N_Group_T+j]);
+			//if((i*N_T+j+1)%4 == 0) printf("\n");
 		}
-		//printf("\n");		
+		printf("\n");
 	}
 	printf("\nU\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++){
-			printf("%.8e ", syn[i][j].U);
-			if((i*N_T+j+1)%4 == 0) printf("\n");
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++){
+			printf("%.8e ", U[i*N_Group_T+j]);
+			//if((i*N_T+j+1)%4 == 0) printf("\n");
 		}
-		//printf("\n");
+		printf("\n");
 	}
 	printf("\nA\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++){
-			printf("%.8e ", syn[i][j].A);	
-			if((i*N_T+j+1)%4 == 0) printf("\n");
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++){
+			printf("%.8e ", A[i*N_Group_T+j]);
+			//if((i*N_T+j+1)%4 == 0) printf("\n");
 		}
-		//printf("\n");
+		printf("\n");
 	}
 	printf("\nlastupdate\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++)
-			printf("%lf, ", syn[i][j].lastupdate);		
-		//printf("\n");
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++)
+			printf("%lf, ", lastupdate[i*N_Group_T+j]);
+		printf("\n");
 	}
 	printf("\ntarget_I\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++){
-			printf("%.8e, ", syn[i][j].target_I);
+	for(int i =0; i < N_Group_S; i++){
+		for(int j = 0; j < N_Group_T; j++){
+			printf("%.8e, ", target_I[i*N_Group_T+j]);
 		}
 		printf("\n");	
 	}
