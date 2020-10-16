@@ -13,6 +13,14 @@ void Neurons::print_spikes() {
     std::cout << std::endl;
 }
 
+void Inputs::SolveNeurons(const double t) {
+    std::fill(spikes.begin(), spikes.end(), 0);
+    while(spike_times[current_index] == t) {
+        spikes[spike_ids[current_index]] = 1;
+        current_index++;
+    }
+}
+
 void AdEx::print_neurons() const{
 	std::cout << "\nvt\n";
 	for(const auto& vt_local : vt){
@@ -43,7 +51,7 @@ inline void AdEx::resetNeuron(const int id) {
     vt[id] = VTmax;
 }
 
-void AdEx::SolveNeurons(){
+void AdEx::SolveNeurons() {
     for(auto id = 0; id < n_neurons; id++){
         double _vm, _vt, _x;
         _vm = (gL*(EL-vm[id])+gL*DeltaT*exp((vm[id]-vt[id])/DeltaT)+I[id]-x[id])/C;

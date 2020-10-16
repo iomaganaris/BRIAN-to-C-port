@@ -8,6 +8,8 @@
 
 #include <vector>
 
+#include "util.hpp"
+
 /**
  * @brief Declaration of parent Neuron class.
  *
@@ -24,7 +26,7 @@ int get_n_neurons() const {
  * Constructor
  */
 explicit Neurons(const int n_neurons): n_neurons(n_neurons){
-    spikes.resize(n_neurons);
+    spikes.resize(n_neurons, 0);
 }
 const std::vector<int>& get_spikes() {
     return spikes;
@@ -44,15 +46,26 @@ void print_spikes();
  * @param SpikeArray Array that contains if a neuron had spiked in a specific moment.
  */
 virtual void SolveNeurons() = 0;
+virtual void SolveNeurons(double t) = 0;
 };
 
-class Input : public Neurons {
-    std::vector<int> spike_replay;
+class Inputs : public Neurons {
+    std::vector<int> spike_ids;
+    std::vector<double> spike_times;
+    int current_index = 0;
 public:
-Input(const int nNeurons, std::vector<int> &ids, std::vector<int> &times) : Neurons(ids.size()) {
-    spike_replay.resize(ids.size()*times.size());
-}
-void SolveNeurons() override;
+/**
+ * @brief Constructor for input spikes
+ *
+ * @param n_input_neurons Number of input neurons
+ * @param ids IDs of the neurons that spike
+ * @param times The corresponding timing for every ID
+ */
+Inputs(const int n_input_neurons, std::vector<int> &ids, std::vector<double> &times) : Neurons(n_input_neurons), spike_ids(ids), spike_times(times) {
+    /// Sort spikes by times to make it easier to read later
+    sort_second(spike_ids, spike_times);
+};
+void SolveNeurons(const double t) override;
 };
 
 class AdEx : public Neurons {
@@ -84,9 +97,9 @@ void SolveNeurons() override;
  * a poisson distribution.
  *
  */
-class PoissonNeurons: public Neurons {
-    std::vector<double> GaussArray;	/**< Gauss initial value. */
-public:
+//class PoissonNeurons: public Neurons {
+//    std::vector<double> GaussArray;	/**< Gauss initial value. */
+//public:
 /**
  * @brief Function to calculate which Poisson neurons have spiked in a specific moment.
  *
@@ -95,5 +108,5 @@ public:
  * @param N_T Number of ADEX (target) neurons.
  * @param SpikeArray Array that contains if a neuron had spiked in a specific moment.
  */
-    void SolveNeurons() override;
-};
+//    void SolveNeurons() override;
+//};
