@@ -36,9 +36,12 @@ public:
 Synapses(Neurons& pre_neurons, AdEx& post_neurons): pre_neurons(pre_neurons), post_neurons(post_neurons) {
         N_Group_S = pre_neurons.get_n_neurons();
         N_Group_T = post_neurons.get_n_neurons();
-        init();
 }
-
+Synapses(Neurons& pre_neurons, AdEx& post_neurons, const std::vector<double>& init_FBp, const std::vector<double>& init_FBn, const std::vector<double>& init_R, const std::vector<double>& init_U, const std::vector<double>& init_A): pre_neurons(pre_neurons), post_neurons(post_neurons), FBp(init_FBp), FBn(init_FBn), R(init_R), U(init_U), A(init_A) {
+    N_Group_S = pre_neurons.get_n_neurons();
+    N_Group_T = post_neurons.get_n_neurons();
+    init();
+}
 /**
  * @brief Initialize the synapses vectors
  */

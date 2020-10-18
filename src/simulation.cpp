@@ -71,7 +71,7 @@ int main(void){
 		double input1_pos = 25;
 		double input2_pos = 75;
 		double rad = 5;
-
+        /* TODO: Handle poisson neurons later
 	    //Define input 1
 	    double *F_input1;
 	    F_input1 = (double*)malloc(sizeof(double)*N_S);
@@ -100,327 +100,67 @@ int main(void){
 	    	input[i].GaussArray = F_input1[i];
 	    	input[i].Spike = 0;
 	    }
-	    
-	    Neuron *neurons;
-	    neurons = (Neuron*)malloc(sizeof(Neuron)*(N_Group_T));
-	    for(int i = 0; i<N_Group_T; i++){				// Initiliazation of Neurons
-	    	neurons[i].vt = vtrest;
-	    	#ifdef NxM
-	    		neurons[i].vm = EL;
-	    	#endif
-	    	#ifdef MxM
-				neurons[i].vm = vtrest + 0.005;//EL;
-			#endif
-	    	//if(i%2==1) neurons[i].vm = vtrest + 0.005;
-	    	neurons[i].I = 0;
-	    	neurons[i].x = 0;
-	    	neurons[i].Spike = 0;
-	    }
+	    */
+        std::vector<double> init_vtrest(N_Group_T, vtrest);
+        std::vector<double> init_vm(N_Group_T, EL);
+        std::vector<double> init_I(N_Group_T, 0);
+        std::vector<double> init_x(N_Group_T, 0);
+	    AdEx AdEx_neurons(init_vtrest, init_vm, init_I, init_x);
 
-	    int *SpikeArray;
-	    SpikeArray = (int*)malloc(sizeof(int)*(N_Group_T+N_S));
-	    
-    	/*model='''w : 1
-             FFp : 1
-             FBp : 1
-             FBn : 1
-             R : 1
-             u : 1
-             U : 1
-             A : 1         
-             dFFp/dt=-FFp/tau_FFp : 1 (event-driven)
-             dFBp/dt=-FBp/tau_FBp : 1 (event-driven)
-             dFBn/dt=-FBn/tau_FBn : 1 (event-driven)
-             dR/dt=(1-R)/tau_r : 1 (event-driven)
-             du/dt=(U-u)/tau_u : 1 (event-driven)            
-             '''*/
+	    std::vector<double> times;
+	    std::vector<int> spike_ids;
+        int timesteps = (int)(stime/defaultclock_dt);
+	    for(auto t = 0; t < timesteps; t++) {
+            for (auto i = 0; i < N_Group_S; i++) {
+                if (i % 2 == t % 2) {
+                    times.push_back(t*defaultclock_dt);
+                    spike_ids.push_back(i);
+                }
+            }
+        }
+        Inputs input_neurons(N_Group_S, spike_ids, times);
 
-	    Synapse *syn[N_S+N_Group_S];
-	    for(int i = 0; i < N_S+N_Group_S; i++) syn[i] = (Synapse*)malloc(sizeof(Synapse) * (N_Group_T));
-
-//Connectivity
-	    #ifndef allconnected
-	    int con = 0;
-	       
-	    for(int i = 0; i < N_Group_S; i++){
-	    	for(int j = 0; j < N_Group_T; j++){ 
-				//fscanf (in, "%d", &con);
-				std::cin >> con;
-	      	   	if (con == 1) syn[i][j].conn = 1;
-				else syn[i][j].conn = 0; 
-			}    
-    	}
-
-	    for(int i = N_Group_S; i < N_Group_S+N_S; i++){
-	    	for(int j = 0; j < N_Group_T; j++){ 
-				//fscanf (in, "%d", &con);
-				std::cin >> con;
-	      	   	if (con == 1) syn[i][j].conn = 1;
-				else syn[i][j].conn = 0; 
-			}    
-    	}
-    	#else
-    	for(int i = 0; i < N_Group_S+N_S; i++)
-	    	for(int j = 0; j < N_Group_T; j++)
-	    		syn[i][j].conn = 1;
-		#endif
-
-	    //Synapse syn[N_S][N_T] = CreateSynapses(input, neurons);	//2D Array of synapses. Each element/synapse has it's variables embedded.
-	    												//Must find a way to describe how they are connected
-	    //syn.connect_one_to_one(input, neurons)
-	    //syn[:,:]=True	//what is that?	#TO DO
-	    //syn.FBp=0		#TO DO
-	    //syn.FBn=0		#TO DO
-	    //syn.R=1		#TO DO
-	    //syn.U='rand()*Uinit'
-	   	//syn.A='rand()*Ainit'
-	    //syn.U[:]=Umin
-	    //syn.U[:]=0.5
-	    
-	    /*for(int i =0; i < N; i++){					//Define gaussian input
-	    	for(int j = 0; j < N; j++){ 
-	        syn[i][j].U = exp(-(((pow((i+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;
-	        syn[i][j].A = exp(-(((pow((i+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;
-	    	}
-		}*/
-
-	    // Initialization of Synapses for Neurons
-    	int init_const = 0;
-	    for(int i = 0; i < N_Group_S; i++){
-	    	for(int j = 0; j < N_Group_T; j++){
-			    if (syn[i][j].conn) {
-		    		//syn[i][j].conn = 1;	// all connected
-					//Connectivity, initialization now happens only in connected synapses.
-		    		syn[i][j].FBp = 0;
-		    		syn[i][j].FBn = 0;
-		    		syn[i][j].R = 1;
-		    		#ifdef MxM
-		    			syn[i][j].u = 1;	// for testing
-		    		#endif
-		    		syn[i][j].U = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-		    		syn[i][j].A = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-		    		init_const++;
-		    		//syn[i][j].U = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-		    		//syn[i][j].A = exp(-(((pow(((i)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-			    }
-	    	}
-	    }
-	    // Initialization of Synapses for external input (bottom rows)
-	    for(int i = N_Group_S; i < N_Group_S+N_S; i++){
-	        for(int j = 0; j < N_Group_T; j++){
-			    if (syn[i][j].conn) {
-					//Connectivity, initialization now happens only in connected synapses.
-			    	//syn[i][j].conn = 1;	// all connected
-		    		syn[i][j].FBp = 0;
-		    		syn[i][j].FBn = 0;
-		    		syn[i][j].R = 1;
-		    		//syn[i][j].U = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-		    		//syn[i][j].A = exp(-(((pow((((i-N_Group_S)*N_Group_T/M+j)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-		    		syn[i][j].U = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-		    		syn[i][j].A = exp(-(((pow(((init_const)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-			     	init_const++;
-			    }
-	        }
-	     }
-	    // Initialization of Synapses for external input ( right columns)
-	    /*for(int i = 0; i < N_S + N_Group_S; i++){
-		    for(int j = N_Group_T; j < N_Group_T+N_S; j++){
-		    	syn[i][j].conn = 1;	// all connected
-	    		syn[i][j].FBp = 0;
-	    		syn[i][j].FBn = 0;
-	    		syn[i][j].R = 1;
-	    		syn[i][j].U = exp(-(((pow(((i*N_Group_T+j-N_Group_T)+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-	    		syn[i][j].A = exp(-(((pow(((i*N_Group_T+j-N_Group_T)+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
-		    }
-		}*/
-
-	    /*printf("U:\n");
-	    for(int i = 0 ; i < N_S+1; i++){
-	    	for(int j = 0; j < N_T+1; j++){
-	    		printf("%lf ",syn[i][j].U);
-	    	}
-	    	printf("\n");
-	    }
-	    printf("A:\n");
-	    for(int i = 0 ; i < N_S+1; i++){
-	    	for(int j = 0; j < N_T+1; j++){
-	    		printf("%lf ",syn[i][j].A);
-	    	}
-	    	printf("\n");
-	    }*/
-
-	    srand(time(NULL));
-
-		int timesteps = stime/defaultclock_dt;
+	    std::vector<double> init_AdEx_FBp(N_Group_T*N_Group_T, 0);
+        std::vector<double> init_AdEx_FBn(N_Group_T*N_Group_T, 0);
+        std::vector<double> init_AdEx_R(N_Group_T*N_Group_T, 1);
+        std::vector<double> init_AdEx_U(N_Group_T*N_Group_T);
+        std::vector<double> init_AdEx_A(N_Group_T*N_Group_T);
+        int init_const = 0;
+        int index = 0;
+        for(int i = 0; i < N_Group_T; i++){
+            for(int j = 0; j < N_Group_T; j++){
+                index = i*N_Group_T + j;
+                init_AdEx_U[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+                init_AdEx_A[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+                init_const++;
+            }
+        }
+        Synapses AdEx_AdEx_synapses(AdEx_neurons, AdEx_neurons, init_AdEx_FBp, init_AdEx_FBn, init_AdEx_R, init_AdEx_U, init_AdEx_A);
+	    // Initialization of Synapses for external input
+        std::vector<double> init_input_FBp(N_Group_S*N_Group_T, 0);
+        std::vector<double> init_input_FBn(N_Group_S*N_Group_T, 0);
+        std::vector<double> init_input_R(N_Group_S*N_Group_T, 1);
+        std::vector<double> init_input_U(N_Group_S*N_Group_T);
+        std::vector<double> init_input_A(N_Group_S*N_Group_T);
+        for(int i = 0; i < N_Group_S; i++){
+            for(int j = 0; j < N_Group_T; j++){
+                index = i*N_Group_T + j;
+                init_input_U[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
+                init_input_A[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+                init_const++;
+            }
+        }
+        Synapses Input_AdEx_synapses(input_neurons, AdEx_neurons, init_input_FBp, init_input_FBn, init_input_R, init_input_U, init_input_A);
 		std::cout << "timesteps=" << timesteps << std::endl;
 		for(int t = 0; t < timesteps; t++){			//add monitors for the variables we care about
-			//printf("t: %.20lf----------------------------------------------------------------------------------------\n",t*defaultclock_dt);
-			//print_neurons(neurons, N_Group_T);
-			//fprintf(g, "t: %.3lf\n", t*defaultclock_dt);
-			neurons_I << t*defaultclock_dt << std::endl;
-			for(int i = 0; i < N_Group_T; i++){
-				//fprintf(g,"%.8e ",neurons[i].I);
-                neurons_I << neurons[i].I << " ";
-			}
-			//fprintf(g, "\n");
-			neurons_I << std::endl;
-			SolveNeurons(neurons, N_Group_T, SpikeArray);	// maybe should bring the for inside out for(int i =0; i < N_T; i++) SolveNeuron(neurons[i],Spikearray[i]);
-			//printf("After SolveNeurons, t: %lf\n",t*defaultclock_dt);
-			//print_neurons(neurons, N_Group_T);
-			/*printf("Loop %d\n",t);
-			for(int i = 0; i < N_Group_T+N_S; i++){
-				printf("%d\n",SpikeArray[i]);
-			}
-			*/
-			//PoissonThreshold(input, N_S, N_Group_S, SpikeArray);
-
-			// Determing when and which input dummy neurons spike for debugging
-			#ifdef NxM
-				//if(t == 0 ) SpikeArray[89+N_Group_T] = 1;
-				//else SpikeArray[89+N_Group_T] = 0;
-				
-				//if(t == 2 || t == 25) SpikeArray[73+N_Group_T] = 1;
-				//else SpikeArray[73+N_Group_T] = 0;
-
-				//if(t*defaultclock_dt == 0.001) SpikeArray[25+N_Group_S] = 1;
-				//else SpikeArray[25+N_Group_S] = 0;
-
-				if(t == 4) SpikeArray[23+N_Group_T] = 1;
-				else SpikeArray[23+N_Group_T] = 0;
-				
-				if(t == 5){
-					SpikeArray[20+N_Group_T] = 1;
-					SpikeArray[45+N_Group_T] = 1;
-					
-				} 
-				else {
-					SpikeArray[20+N_Group_T] = 0;
-					SpikeArray[45+N_Group_T] = 0;
-					
-				}
-
-				//if(t == 6 ) SpikeArray[81+N_Group_T] = 1;
-				//else SpikeArray[81+N_Group_T] = 0;
-				
-				if(t == 7 ) SpikeArray[7+N_Group_T] = 1;
-				else SpikeArray[7+N_Group_T] = 0;
-				
-				if(t == 7 || t == 11 || t == 13 || t == 20 || t == 26 || t == 28 || t == 31) SpikeArray[27+N_Group_T] = 1;
-				else SpikeArray[27+N_Group_T] = 0;
-
-				if(t == 9 ) SpikeArray[25+N_Group_T] = 1;
-				else SpikeArray[25+N_Group_T] = 0;
-				
-				if(t == 11 ) SpikeArray[11+N_Group_T] = 1;
-				else SpikeArray[11+N_Group_T] = 0;
-				
-				if(t == 15 ) SpikeArray[29+N_Group_T] = 1;
-				else SpikeArray[29+N_Group_T] = 0;
-				
-				if(t == 19 ) SpikeArray[32+N_Group_T] = 1;
-				else SpikeArray[32+N_Group_T] = 0;
-				
-				if(t == 25){
-					SpikeArray[41+N_Group_T] = 1;
-					//SpikeArray[73+N_Group_T] = 1;
-					
-				} 
-				else {
-					SpikeArray[41+N_Group_T] = 0;
-					//SpikeArray[73+N_Group_T] = 0;
-					
-				}
-				
-				if(t == 26 ) SpikeArray[14+N_Group_T] = 1;
-				else SpikeArray[14+N_Group_T] = 0;
-				
-				if(t == 28 || t == 30 ) SpikeArray[22+N_Group_T] = 1;
-				else SpikeArray[22+N_Group_T] = 0;
-				
-				if(t == 28 ) SpikeArray[31+N_Group_T] = 1;
-				else SpikeArray[31+N_Group_T] = 0;
-				
-				if(t == 29 ) SpikeArray[24+N_Group_T] = 1;
-				else SpikeArray[24+N_Group_T] = 0;
-				
-			#endif
-
-			int flag = 0;
-			//printf("SpikeArray\n");
-			for(int i = 0; i < N_Group_T+N_S; i++){
-				if (SpikeArray[i]==1) flag=1;
-				//printf("%d, ",SpikeArray[i]);
-			}
-			//fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
-            spikes << t*defaultclock_dt << std::endl;
-			for(int i = 0; i < N_Group_T; i++){
-				if (SpikeArray[i]!=0){
-					//fprintf(f,"%d ",i);
-                    spikes << i << " ";
-				}
-			}
-			//fprintf(f, "\n");
-            spikes << std::endl;
-			//if(N_S>0)fprintf(f, "t: %.3lf \n", t*defaultclock_dt);
-            if(N_S>0) spikes << t*defaultclock_dt << std::endl;
-			for(int i = N_Group_T; i < N_S; i++){
-				if(SpikeArray[i]!=0){
-					//fprintf(f,"%d ",i-N_Group_T);
-                    spikes << i << " ";
-				}
-			}
-			//if(N_S>0) fprintf(f, "\n");
-            if(N_S>0) spikes << std::endl;
-			
-			std::cout << "\nSynapses//////////////////////////////////////////////////////\n" << std::endl;
-			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
-			//print_synapses(syn,N_S+N_Group_S,N_Group_T);
-			flag = 0;
-			for(int i = N_Group_T; i < N_Group_T+N_S; i++){
-				if(SpikeArray[i]==1)flag=1;
-			}
-			if(flag==1){
-				//fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
-                array_A << t*defaultclock_dt << std::endl;
-				for(int i =0; i < N_S+N_Group_S; i++){
-					for(int j = 0; j < N_Group_T; j++){
-						//if (syn[i][j].conn) fprintf(h,"%.8e ", syn[i][j].A);
-                        if (syn[i][j].conn) array_A << syn[i][j].A << " ";
-						//if((i*N_T+j+1)%4 == 0) printf("\n");
-					}
-					//printf("\n");
-				}
-				//fprintf(h, "\n");
-				array_A << std::endl;
-			}
-			UpdateSynapses_pre(syn, neurons, N_S, N_Group_S, N_Group_T, SpikeArray, t*defaultclock_dt);
-			//printf("\n\n\nSynapses after pre update, t: %lf\n\n\n",t*defaultclock_dt);
-			flag = 0;
-			for(int i = 0; i < N_Group_T; i++){
-				if(SpikeArray[i]==1)flag=1;
-			}
-			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
-			//print_synapses(syn,N_S+N_Group_S,N_Group_T);
-			if(flag==1){
-				//fprintf(h, "t: %.3lf \n", t*defaultclock_dt);
-                array_A << t*defaultclock_dt << std::endl;
-				for(int i =0; i < N_S+N_Group_S; i++){
-					for(int j = 0; j < N_Group_T; j++){
-						//if (syn[i][j].conn) fprintf(h,"%.8e ", syn[i][j].A);
-                        if (syn[i][j].conn) array_A << syn[i][j].A << " ";
-						//if((i*N_T+j+1)%4 == 0) printf("\n");
-					}
-					//printf("\n");
-				}
-				//fprintf(h, "\n");
-                array_A << std::endl;
-			}
-			//fflush(stdout);
-			UpdateSynapses_post(syn, N_S, N_Group_S, N_Group_T, SpikeArray, t*defaultclock_dt);
-			//printf("\n\n\nSynapses after post update, t: %lf\n\n\n",t*defaultclock_dt);
-			//print_synapses(syn,N_S+N_Group_S,N_Group_T+N_S);
-			//print_synapses(syn,N_S+N_Group_S,N_Group_T);
-			//print_neurons(neurons, N_Group_T);
+			input_neurons.generate_spikes(t*defaultclock_dt);
+			AdEx_neurons.solve_neurons();
+            input_neurons.print_spikes();
+            AdEx_neurons.print_spikes();
+			Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
+			AdEx_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
+            Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
+            AdEx_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
 		}
 	}
     spikes.close();

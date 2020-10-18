@@ -38,15 +38,6 @@ const std::vector<int>& get_spikes() {
  * @param N Number of neurons to print (dummy or ADEX).
  */
 void print_spikes();
-/**
- * @brief Function to update the variables of the neurons. It is called in every timestep.
- *
- * @param neurons Array containing all the neurons.
- * @param N Number of neurons to update.
- * @param SpikeArray Array that contains if a neuron had spiked in a specific moment.
- */
-virtual void SolveNeurons() = 0;
-virtual void SolveNeurons(double t) = 0;
 };
 
 class Inputs : public Neurons {
@@ -65,7 +56,7 @@ Inputs(const int n_input_neurons, std::vector<int> &ids, std::vector<double> &ti
     /// Sort spikes by times to make it easier to read later
     sort_second(spike_ids, spike_times);
 };
-void SolveNeurons(const double t) override;
+void generate_spikes(double t);
 };
 
 class AdEx : public Neurons {
@@ -74,6 +65,7 @@ class AdEx : public Neurons {
     std::vector<double> I;	/**< Neuron input current.	*/
     std::vector<double> x;	/**< Adaption variable (w).	*/
 public:
+AdEx(const std::vector<double>& init_vt, const std::vector<double>& init_vm, const std::vector<double>& init_I, const std::vector<double>& init_x) : Neurons(init_vt.size()), vt(init_vt), vm(init_vm), I(init_I), x(init_x) {};
 void update_I(std::vector<int>& pre_spikes, std::vector<double>& synapses_I);
 /**
  * @brief Function to print all the variables of the neurons.
@@ -88,7 +80,7 @@ void print_neurons() const;
  * @param neuron Neuron to reset.
  */
 inline void resetNeuron(int id);
-void SolveNeurons() override;
+void solve_neurons();
 };
 
 /**
