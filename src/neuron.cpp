@@ -8,7 +8,7 @@
 void Neurons::print_spikes() {
     std::cout << "\nSpikes\n";
     for(const auto& spikes_local : spikes){
-        std::cout << spikes_local < ", ";
+        std::cout << spikes_local << ", ";
     }
     std::cout << std::endl;
 }
@@ -40,7 +40,7 @@ void AdEx::print_neurons() const{
     }
     std::cout << "\nSpikes\n";
     for(const auto& spikes_local : spikes){
-        std::cout << spikes_local < ", ";
+        std::cout << spikes_local << ", ";
     }
 	std::cout << std::endl;
 }

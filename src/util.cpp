@@ -2,13 +2,14 @@
 // Created by Magkanaris Ioannis on 16.10.20.
 //
 
+#include <algorithm>
 #include <vector>
 
 template <typename A, typename B>
 void zip(
         const std::vector<A> &a,
         const std::vector<B> &b,
-        std::vector<std::pair<A,B>> &zipped)
+        std::vector<std::pair<A,B> > &zipped)
 {
     for(size_t i=0; i<a.size(); ++i)
     {
@@ -21,7 +22,7 @@ void zip(
 // that the vectors have equal length)
 template <typename A, typename B>
 void unzip(
-        const std::vector<std::pair<A, B>> &zipped,
+        const std::vector<std::pair<A, B> > &zipped,
         std::vector<A> &a,
         std::vector<B> &b)
 {
@@ -35,7 +36,7 @@ void unzip(
 template <typename A, typename B>
 void sort_second(std::vector<A> &a, std::vector<B> &b) {
     /// Zip the vectors together
-    std::vector<std::pair<std::string, int>> zipped;
+    std::vector<std::pair<std::string, int> > zipped;
     zip(a, b, zipped);
 
     /// Sort the vector of pairs
