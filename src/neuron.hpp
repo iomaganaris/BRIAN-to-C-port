@@ -54,7 +54,7 @@ public:
  */
 Inputs(const int n_input_neurons, std::vector<int> &ids, std::vector<double> &times) : Neurons(n_input_neurons), spike_ids(ids), spike_times(times) {
     /// Sort spikes by times to make it easier to read later
-    sort_second(spike_ids, spike_times);
+    //sort_second(spike_ids, spike_times);
 };
 void generate_spikes(double t);
 };

@@ -35,7 +35,7 @@ int main(void){
 
 	for(int nrun = 0; nrun < nruns; nrun++){
 		double realtime = 0;
-		double stime = 0.1; //second
+		double stime = 0.005; //second
 		double stime2 = 50; //second
 
 		double resolution_export = 10 * 1e-3; //every x ms
@@ -101,7 +101,7 @@ int main(void){
 	    	input[i].Spike = 0;
 	    }
 	    */
-        std::vector<double> init_vtrest(N_Group_T, vtrest);
+        std::vector<double> init_vtrest(N_Group_T, EL-0.5);
         std::vector<double> init_vm(N_Group_T, EL);
         std::vector<double> init_I(N_Group_T, 0);
         std::vector<double> init_x(N_Group_T, 0);
@@ -112,10 +112,12 @@ int main(void){
         int timesteps = (int)(stime/defaultclock_dt);
 	    for(auto t = 0; t < timesteps; t++) {
             for (auto i = 0; i < N_Group_S; i++) {
-                if (i % 2 == t % 2) {
-                    times.push_back(t*defaultclock_dt);
-                    spike_ids.push_back(i);
-                }
+//                if (i % 2 == t % 2) {
+//                    times.push_back(t*defaultclock_dt);
+//                    spike_ids.push_back(i);
+//                }
+                times.push_back(t*defaultclock_dt);
+                spike_ids.push_back(1);
             }
         }
         Inputs input_neurons(N_Group_S, spike_ids, times);
@@ -130,8 +132,8 @@ int main(void){
         for(int i = 0; i < N_Group_T; i++){
             for(int j = 0; j < N_Group_T; j++){
                 index = i*N_Group_T + j;
-                init_AdEx_U[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
-                init_AdEx_A[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
+                init_AdEx_U[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin*10;	// takes time
+                init_AdEx_A[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin*10;	// takes time
                 init_const++;
             }
         }
@@ -155,10 +157,12 @@ int main(void){
 		for(int t = 0; t < timesteps; t++){			//add monitors for the variables we care about
 			input_neurons.generate_spikes(t*defaultclock_dt);
 			AdEx_neurons.solve_neurons();
-            input_neurons.print_spikes();
-            AdEx_neurons.print_spikes();
+            //input_neurons.print_spikes();
+            //AdEx_neurons.print_spikes();
+            AdEx_neurons.print_neurons();
 			Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
 			AdEx_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
+            AdEx_AdEx_synapses.print_synapses();
             Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
             AdEx_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
 		}

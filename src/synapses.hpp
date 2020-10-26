@@ -27,8 +27,8 @@ class Synapses {
     std::vector<double> target_I;	/**< The I value for the postsynaptic neuron. */
     int N_Group_S;  /**< The number of pre synaptic neurons. */
     int N_Group_T;  /**< The number of post synaptic neurons. */
-    Neurons pre_neurons;
-    AdEx post_neurons;
+    Neurons& pre_neurons;
+    AdEx& post_neurons;
 public:
 /**
  * Constructor

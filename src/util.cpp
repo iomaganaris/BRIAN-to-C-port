@@ -34,7 +34,7 @@ void unzip(
 }
 
 template <typename A, typename B>
-void sort_second(std::vector<A> &a, std::vector<B> &b) {
+void sort_second(std::vector<A>& a, std::vector<B>& b) {
     /// Zip the vectors together
     std::vector<std::pair<std::string, int> > zipped;
     zip(a, b, zipped);

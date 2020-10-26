@@ -24,4 +24,4 @@ void unzip(const std::vector<std::pair<A, B> > &zipped, std::vector<A> &a,  std:
  * Sort vectors \a and \b based on \b
  */
 template <typename A, typename B>
-void sort_second(std::vector<A> &a, std::vector<B> &b);
+void sort_second(std::vector<A>& a, std::vector<B>& b);
