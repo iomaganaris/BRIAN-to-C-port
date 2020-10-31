@@ -11,6 +11,7 @@
  */
 #include <cstdio>
 #include <cmath>
+#include <iostream>
 
 #include "constants.hpp"
 #include "synapses.hpp"
@@ -18,7 +19,7 @@
 void Synapses::init() {
     w.resize(N_Group_S*N_Group_T, 0);
     FFp.resize(N_Group_S*N_Group_T, 0);
-    u.resize(N_Group_S*N_Group_T, 0);
+    u.resize(N_Group_S*N_Group_T, 1);
     lastupdate.resize(N_Group_S*N_Group_T, 0);
     target_I.resize(N_Group_S*N_Group_T, 0);
 }

@@ -101,8 +101,8 @@ int main(void){
 	    	input[i].Spike = 0;
 	    }
 	    */
-        std::vector<double> init_vtrest(N_Group_T, EL-0.5);
-        std::vector<double> init_vm(N_Group_T, EL);
+        std::vector<double> init_vtrest(N_Group_T, vtrest);
+        std::vector<double> init_vm(N_Group_T, vtrest+ 0.005); //EL);
         std::vector<double> init_I(N_Group_T, 0);
         std::vector<double> init_x(N_Group_T, 0);
 	    AdEx AdEx_neurons(init_vtrest, init_vm, init_I, init_x);
@@ -158,12 +158,12 @@ int main(void){
 			input_neurons.generate_spikes(t*defaultclock_dt);
 			AdEx_neurons.solve_neurons();
             //input_neurons.print_spikes();
-            //AdEx_neurons.print_spikes();
+            AdEx_neurons.print_spikes();
             AdEx_neurons.print_neurons();
-			Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
+			//Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
 			AdEx_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
-            AdEx_AdEx_synapses.print_synapses();
-            Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
+            //AdEx_AdEx_synapses.print_synapses();
+            //Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
             AdEx_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
 		}
 	}
