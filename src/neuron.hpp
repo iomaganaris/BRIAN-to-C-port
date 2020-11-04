@@ -80,6 +80,12 @@ void print_neurons() const;
  * @param neuron Neuron to reset.
  */
 inline void resetNeuron(int id);
+/*eqs_neuron = """
+dvm/dt=(gL*(EL-vm)+gL*DeltaT*exp((vm-vt)/DeltaT)+I-x)/C : volt
+dvt/dt=-(vt-vtrest)/tauvt : volt
+dx/dt=(c*(vm-EL)-x)/tauw : amp #In the standard formulation x is w
+I : amp
+"""*/
 void solve_neurons();
 };
 

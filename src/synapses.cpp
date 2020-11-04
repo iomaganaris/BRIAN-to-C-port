@@ -29,9 +29,9 @@ void Synapses::UpdateSynapses_pre(double t){
     auto index = 0;
 	for (int i = 0; i < N_Group_S; i++){
 		if (pre_spikes[i] > 0){
-			printf("i= %d SpikeArray[i]= %d\n",i,pre_spikes[i]);
+			//printf("i= %d SpikeArray[i]= %d\n",i,pre_spikes[i]);
 			for (int j = 0; j < N_Group_T; j++){
-                printf("i = %d, j = %d\n",i,j);
+                //printf("i = %d, j = %d\n",i,j);
                 index = i*N_Group_T+j;
                 FFp[index] = FFp[index] * exp(-(-lastupdate[index] + t)/tau_FFp);
                 FBn[index] = FBn[index] * exp(-(-lastupdate[index] + t)/tau_FBn);
@@ -75,8 +75,8 @@ void Synapses::UpdateSynapses_post(double t){
 	        for (int j = 0; j < N_Group_S; j++){
 	        	//printf("i = %d, j = %d Synapses[j][i].conn= %d\n",i,j,Synapses[j][i].conn);
 				//fflush(stdout);
-                printf("i = %d, j = %d\n",i,j);
-                fflush(stdout);
+                //printf("i = %d, j = %d\n",i,j);
+                //fflush(stdout);
                 index = i+j*N_Group_T;
                 FFp[index] = FFp[index] * exp(-(-lastupdate[index] + t)/tau_FFp);
                 FBn[index] = FBn[index] * exp(-(-lastupdate[index] + t)/tau_FBn);
@@ -93,7 +93,7 @@ void Synapses::UpdateSynapses_post(double t){
                     }
                 }
                 mean = (double)mean / (N_Group_S*N_Group_T);
-                printf("mean = %lf",mean);
+                //printf("mean = %lf",mean);
                 A[index] = A[index] - etaA * 0.5 * mean; //amfibola swsto, sigoura mi apodotiko
                 if (A[index] < Amin) A[index] = Amin;
                 else if (A[index] > Amax) A[index] = Amax;
