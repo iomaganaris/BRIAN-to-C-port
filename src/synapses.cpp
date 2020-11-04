@@ -1,14 +1,14 @@
 /**
- * @file synapses.c
+ * @file synapses.cpp
  * @author Ioannis Magkanaris
- * @author Alexandros Neofytou
- * @date 23 April 2014
- * @brief File containing all the functions of Synapses.
+ * @date 4 November 2020
+ * @brief File containing all the functions of Synapses
  *
  * It contains the function for updating the state of a synapse due to
  * a pre- and post-synaptic event and also a function for printing all the 
- * elements of the 2D matrix of synapses.
+ * elements of the 2D matrix of synapses
  */
+
 #include <cstdio>
 #include <cmath>
 #include <iostream>
@@ -153,83 +153,65 @@ void Synapses::UpdateSynapses_post(double t){
 }
 
 void Synapses::print_synapses(){
-	/*printf("conn\n");
-	for(int i =0; i < N_S; i++){
-		for(int j = 0; j < N_T; j++){
-			//printf("conn= %d, w= %lf, FFp= %lf, FBp= %lf, FBn= %lf, R= %lf, u= %lf, U= %lf, A= %lf, lastup= %lf, target_I= %lf\n",syn[i][j].conn,syn[i][j].w,syn[i][j].FFp,syn[i][j].FBp,syn[i][j].FBn,syn[i][j].R,syn[i][j].u,syn[i][j].U,syn[i][j].A,syn[i][j].lastupdate,syn[i][j].target_I);
-			printf("%d ", syn[i][j].conn);
-			//if((i*N_T+j)%4 == 0) printf("\n");
-		}
-		printf("\n");
-	}*/
 	printf("\nw\n");
 	for(int i =0; i < N_Group_S; i++){
-		for(int j = 0; j < N_Group_T; j++){
-			printf("%.8e ", w[i*N_Group_T+j]);
-			//if((i*N_T+j+1)%4 == 0) printf("\n");
-		}
-		printf("\n");
+		for(int j = 0; j < N_Group_T; j++)
+			std::cout << w[i*N_Group_T+j] << ", ";
+		std::cout << "\n";
 	}
 	printf("\nFFp\n");
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
-			printf("%.8e, ", FFp[i*N_Group_T+j]);
-		printf("\n");	
+            std::cout << FFp[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\nFBp\n");
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
-			printf("%.8e, ", FBp[i*N_Group_T+j]);
-		printf("\n");
+            std::cout << FBp[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\nFBn\n");
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
-			printf("%.8e, ", FBn[i*N_Group_T+j]);
-		printf("\n");		
+            std::cout << FBn[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\nR\n");
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
-			printf("%.8e, ", R[i*N_Group_T+j]);
-		printf("\n");
+            std::cout << R[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\nu\n");
 	for(int i =0; i < N_Group_S; i++){
-		for(int j = 0; j < N_Group_T; j++){
-			printf("%.8e ", u[i*N_Group_T+j]);
-			//if((i*N_T+j+1)%4 == 0) printf("\n");
-		}
-		printf("\n");
+		for(int j = 0; j < N_Group_T; j++)
+            std::cout << u[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\nU\n");
 	for(int i =0; i < N_Group_S; i++){
-		for(int j = 0; j < N_Group_T; j++){
-			printf("%.8e ", U[i*N_Group_T+j]);
-			//if((i*N_T+j+1)%4 == 0) printf("\n");
-		}
-		printf("\n");
+		for(int j = 0; j < N_Group_T; j++)
+            std::cout << U[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\nA\n");
 	for(int i =0; i < N_Group_S; i++){
-		for(int j = 0; j < N_Group_T; j++){
-			printf("%.8e ", A[i*N_Group_T+j]);
-			//if((i*N_T+j+1)%4 == 0) printf("\n");
-		}
-		printf("\n");
+		for(int j = 0; j < N_Group_T; j++)
+            std::cout << A[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\nlastupdate\n");
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
-			printf("%lf, ", lastupdate[i*N_Group_T+j]);
-		printf("\n");
+            std::cout << lastupdate[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
 	printf("\ntarget_I\n");
 	for(int i =0; i < N_Group_S; i++){
-		for(int j = 0; j < N_Group_T; j++){
-			printf("%.8e, ", target_I[i*N_Group_T+j]);
-		}
-		printf("\n");	
+		for(int j = 0; j < N_Group_T; j++)
+            std::cout << target_I[i*N_Group_T+j] << ", ";
+        std::cout << "\n";
 	}
-	printf("\n");
+    std::cout << "\n";
 }

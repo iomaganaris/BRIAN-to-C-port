@@ -1,15 +1,12 @@
 /**
  * @file simulation.cpp
  * @author Ioannis Magkanaris
- * @author Alexandros Neofytou
- * @date 23 April 2018
+ * @date 4 November 2020
  * @brief Simulation main file.
  *
- * Contains the main function of the program, with all the initializations
- * of the variables needed for a specific simulation.
+ * Contains the initialization of the circuit and the main simulation loop.
  */
 #include <iostream>
-#include <fstream>
 #include <cmath>
 
 #include "constants.hpp"
@@ -19,19 +16,15 @@ int main(int argc, char **argv){
 
     if (argc < 4)
     {
-        std::cout << "Simulation needs 3 arguments. Simulation time, number of Input neurons and number of AdEx neurons.\n";
+        std::cout << "Simulation needs 3 arguments. Simulation time (s), number of Input neurons and number of AdEx neurons.\n";
         return 1;
     }
 
-    double stime = std::stof(argv[1]); // seconds
-
-    int N_Group_S = std::stoi(argv[2]);
-    int N_Group_T = std::stoi(argv[3]);
+    const double stime = std::stof(argv[1]); // seconds
+    const int N_Group_S = std::stoi(argv[2]);
+    const int N_Group_T = std::stoi(argv[3]);
 
     std::cout << "Simulating " << N_Group_S << " Input and " << N_Group_T << " AdEx Neurons\n";
-
-    double input1_pos = 25;
-    double rad = 5;
 
     /// Initializing AdEx Neurons
     std::vector<double> init_vtrest(N_Group_T, vtrest);
@@ -43,7 +36,7 @@ int main(int argc, char **argv){
     /// Initializing Input Neurons firing every 2 time steps
     std::vector<double> times;
     std::vector<int> spike_ids;
-    int timesteps = (int)(stime/defaultclock_dt);
+    const int timesteps = (int)(stime/defaultclock_dt);
     for(auto t = 0; t < timesteps; t++) {
         for (auto i = 0; i < N_Group_S; i++) {
             if (t % 2 == 0) {
@@ -60,6 +53,8 @@ int main(int argc, char **argv){
     std::vector<double> init_AdEx_R(N_Group_T*N_Group_T, 1);
     std::vector<double> init_AdEx_U(N_Group_T*N_Group_T);
     std::vector<double> init_AdEx_A(N_Group_T*N_Group_T);
+    const double input1_pos = 25;
+    const double rad = 5;
     int init_const = 0;
     int index = 0;
     for(int i = 0; i < N_Group_T; i++){

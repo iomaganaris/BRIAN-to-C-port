@@ -1,9 +1,8 @@
 /**
- * @file neuron.h
+ * @file neuron.hpp
  * @author Ioannis Magkanaris
- * @author Alexandros Neofytou
- * @date 23 April 2014
- * @brief Header file containing all the declarations of Neuron classes and neurons' functions.
+ * @date 4 November 2020
+ * @brief Header file containing all the declarations of Neuron classes and neurons' functions
  */
 
 #include <vector>

@@ -1,6 +1,9 @@
-//
-// Created by Magkanaris Ioannis on 16.10.20.
-//
+/**
+ * @file util.hpp
+ * @author Ioannis Magkanaris
+ * @date 4 November 2020
+ * @brief Header file containing utilities functions
+ */
 
 #pragma once
 

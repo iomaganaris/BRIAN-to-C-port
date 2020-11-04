@@ -1,10 +1,10 @@
 /**
- * @file synapses.h
+ * @file synapses.hpp
  * @author Ioannis Magkanaris
- * @author Alexandros Neofytou
- * @date 23 April 2014
- * @brief Header file containing all the declarations of Synapse class and synapses' functions.
+ * @date 4 November 2020
+ * @brief Header file containing all the declarations of Synapse class and synapses' functions
  */
+
 #include <vector>
 
 #include "neuron.hpp"

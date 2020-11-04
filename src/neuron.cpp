@@ -1,5 +1,13 @@
+/**
+ * @file neuron.cpp
+ * @author Ioannis Magkanaris
+ * @date 4 November 2020
+ * @brief File containing all the functions of Neurons
+ *
+ * It contains the declarations of all the types of Neurons
+ */
+
 #include <cmath>
-#include <cstdlib>
 #include <iostream>
 
 #include "constants.hpp"
@@ -55,16 +63,12 @@ void AdEx::solve_neurons() {
     for(auto id = 0; id < n_neurons; id++){
         double _vm, _vt, _x;
         _vm = (gL*(EL-vm[id])+gL*DeltaT*exp((vm[id]-vt[id])/DeltaT)+I[id]-x[id])/C;
-        //printf("_vm = %.20f\n", _vm);
         _vt = -(vt[id]-vtrest)/tauvt;
-        //printf("_vt = %.20f\n", _vm);
         _x = (c*(vm[id]-EL)-x[id])/tauw;
-        //printf("_x = %.20f\n", _x);
         vm[id] += _vm * defaultclock_dt;
         vt[id] += _vt * defaultclock_dt;
         x[id] += _x * defaultclock_dt;
         if(vm[id] > vt[id]){
-            //printf("Reset\n");
             resetNeuron(id);
             spikes[id] = 1;
         }
@@ -85,22 +89,3 @@ void AdEx::update_I(std::vector<int>& pre_spikes, std::vector<double>& synapses_
         }
     }
 }
-
-/*double random_0_1(){
-	return (double)rand()/(double)((unsigned)RAND_MAX+1);
-}
-
-void PoissonThreshold(Poisson* input, int N_S, int N_T, int* SpikeArray){
-	for(int i = 0; i<N_S; i++){
-		if(random_0_1()<input[i].GaussArray*defaultclock_dt){
-			input[i].Spike = 1;
-			SpikeArray[N_T+i] = 1;
-			printf("PoissonThreshold i= %d\n",i);
-		} 
-		else{
-			input[i].Spike = 0;
-			SpikeArray[N_T+i] = 0;
-		}
-	}
-	return;
-}*/

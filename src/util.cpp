@@ -1,6 +1,9 @@
-//
-// Created by Magkanaris Ioannis on 16.10.20.
-//
+/**
+ * @file synapses.cpp
+ * @author Ioannis Magkanaris
+ * @date 4 November 2020
+ * @brief Source file containing utilities functions
+ */
 
 #include <algorithm>
 #include <vector>
@@ -17,9 +20,10 @@ void zip(
     }
 }
 
-// Write the first and second element of the pairs in
-// the given zipped vector into a and b. (This assumes
-// that the vectors have equal length)
+/* Write the first and second element of the pairs in the
+ * given zipped vector into a and b. (This assumes that
+ * the vectors have equal length)
+ */
 template <typename A, typename B>
 void unzip(
         const std::vector<std::pair<A, B> > &zipped,
