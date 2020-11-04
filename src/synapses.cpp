@@ -9,7 +9,6 @@
  * elements of the 2D matrix of synapses
  */
 
-#include <cstdio>
 #include <cmath>
 #include <iostream>
 
@@ -153,61 +152,61 @@ void Synapses::UpdateSynapses_post(double t){
 }
 
 void Synapses::print_synapses(){
-	printf("\nw\n");
+    std::cout << "\nw\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
 			std::cout << w[i*N_Group_T+j] << ", ";
 		std::cout << "\n";
 	}
-	printf("\nFFp\n");
+    std::cout << "\nFFp\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << FFp[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\nFBp\n");
+    std::cout << "\nFBp\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << FBp[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\nFBn\n");
+    std::cout << "\nFBn\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << FBn[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\nR\n");
+    std::cout << "\nR\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << R[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\nu\n");
+    std::cout << "\nu\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << u[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\nU\n");
+    std::cout << "\nU\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << U[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\nA\n");
+    std::cout << "\nA\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << A[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\nlastupdate\n");
+    std::cout << "\nlastupdate\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << lastupdate[i*N_Group_T+j] << ", ";
         std::cout << "\n";
 	}
-	printf("\ntarget_I\n");
+    std::cout << "\ntarget_I\n";
 	for(int i =0; i < N_Group_S; i++){
 		for(int j = 0; j < N_Group_T; j++)
             std::cout << target_I[i*N_Group_T+j] << ", ";
