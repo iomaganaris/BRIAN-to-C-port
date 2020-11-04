@@ -58,7 +58,7 @@ int main(void){
 
 		#ifdef MxM
 			N_S = 0;//100;
-			N_Group_S = M;
+			N_Group_S = 100;
 			N_Group_T = M;	//for the simulation we have, normally is N
 		#endif
 	    /*eqs_neuron = """
@@ -112,12 +112,12 @@ int main(void){
         int timesteps = (int)(stime/defaultclock_dt);
 	    for(auto t = 0; t < timesteps; t++) {
             for (auto i = 0; i < N_Group_S; i++) {
-//                if (i % 2 == t % 2) {
-//                    times.push_back(t*defaultclock_dt);
-//                    spike_ids.push_back(i);
-//                }
-                times.push_back(t*defaultclock_dt);
-                spike_ids.push_back(1);
+                if (t % 2 == 0) {
+                    times.push_back(t*defaultclock_dt);
+                    spike_ids.push_back(i);
+                }
+//                times.push_back(t*defaultclock_dt);
+//                spike_ids.push_back(1);
             }
         }
         Inputs input_neurons(N_Group_S, spike_ids, times);
@@ -144,6 +144,7 @@ int main(void){
         std::vector<double> init_input_R(N_Group_S*N_Group_T, 1);
         std::vector<double> init_input_U(N_Group_S*N_Group_T);
         std::vector<double> init_input_A(N_Group_S*N_Group_T);
+        init_const = 0;
         for(int i = 0; i < N_Group_S; i++){
             for(int j = 0; j < N_Group_T; j++){
                 index = i*N_Group_T + j;
@@ -157,14 +158,15 @@ int main(void){
 		for(int t = 0; t < timesteps; t++){			//add monitors for the variables we care about
 			input_neurons.generate_spikes(t*defaultclock_dt);
 			AdEx_neurons.solve_neurons();
-            //input_neurons.print_spikes();
+            input_neurons.print_spikes();
             AdEx_neurons.print_spikes();
             AdEx_neurons.print_neurons();
-			//Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
-			AdEx_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
+			Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
+			//AdEx_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
             //AdEx_AdEx_synapses.print_synapses();
-            //Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
-            AdEx_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
+            Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
+            //AdEx_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
+            Input_AdEx_synapses.print_synapses();
 		}
 	}
     spikes.close();
