@@ -56,7 +56,7 @@ void AdEx::print_neurons() const{
 inline void AdEx::resetNeuron(const int id) {
     vm[id] = Vr;
     x[id] += b;
-    vt[id] = Vr + 0.005;
+    vt[id] = VTmax;
 }
 
 void AdEx::solve_neurons() {
@@ -71,6 +71,7 @@ void AdEx::solve_neurons() {
         if(vm[id] > vt[id]){
             resetNeuron(id);
             spikes[id] = 1;
+            n_spikes++;
         }
         else spikes[id] = 0;
     }
