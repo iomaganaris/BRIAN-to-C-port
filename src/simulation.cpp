@@ -63,6 +63,7 @@ int main(int argc, char **argv){
             init_AdEx_U[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin*10;	// takes time
             init_AdEx_A[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin*10;	// takes time
             init_const++;
+            init_const = init_const % (N_Group_S + N_Group_S) % 100;
         }
     }
     Synapses AdEx_AdEx_synapses(AdEx_neurons, AdEx_neurons, init_AdEx_FBp, init_AdEx_FBn, init_AdEx_R, init_AdEx_U, init_AdEx_A);
@@ -80,6 +81,7 @@ int main(int argc, char **argv){
             init_input_U[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;	// takes time
             init_input_A[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;	// takes time
             init_const++;
+            init_const = init_const % (N_Group_S + N_Group_S) % 100;
         }
     }
     Synapses Input_AdEx_synapses(input_neurons, AdEx_neurons, init_input_FBp, init_input_FBn, init_input_R, init_input_U, init_input_A);
@@ -93,10 +95,10 @@ int main(int argc, char **argv){
         AdEx_neurons.print_spikes();
         //AdEx_neurons.print_neurons();
         Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
-        AdEx_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
+        //AdEx_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
         //AdEx_AdEx_synapses.print_synapses();
         Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
-        AdEx_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
+        //AdEx_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
         //Input_AdEx_synapses.print_synapses();
     }
 
