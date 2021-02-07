@@ -54,9 +54,9 @@ void AdEx::print_neurons() const{
 }
 
 inline void AdEx::resetNeuron(const int id) {
-    vm[id] = Vr;
+    vm[id] = vtrest;
     x[id] += b;
-    vt[id] = VTmax;
+    vt[id] = -100000000000;
 }
 
 void AdEx::solve_neurons() {

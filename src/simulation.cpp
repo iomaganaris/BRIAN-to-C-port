@@ -31,7 +31,7 @@ int main(int argc, char **argv){
 
     /// Initializing AdEx Neurons
     std::vector<double> init_vtrest(N_Group_T, vtrest);
-    std::vector<double> init_vm(N_Group_T, vtrest+ 0.005);
+    std::vector<double> init_vm(N_Group_T, vtrest + 0.005);
     std::vector<double> init_I(N_Group_T, 0);
     std::vector<double> init_x(N_Group_T, 0);
     AdEx AdEx_neurons(init_vtrest, init_vm, init_I, init_x);
@@ -43,12 +43,18 @@ int main(int argc, char **argv){
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> distrib_neurons(0., 1.);
     const int timesteps = (int)(stime/defaultclock_dt);
-    for(auto t = 0; t < timesteps; t++) {
+    /*for(auto t = 0; t < timesteps; t++) {
         for (auto i = 0; i < N_Group_S; i++) {
             if (distrib_neurons(gen) < 0.3) {
                 times.push_back(t*defaultclock_dt);
                 spike_ids.push_back(i);
             }
+        }
+    }*/
+    for(auto t = 0; t < timesteps; t++) {
+        for (auto i = 0; i < N_Group_S; i++) {
+            times.push_back(t*defaultclock_dt);
+            spike_ids.push_back(i);
         }
     }
     Inputs input_neurons(N_Group_S, spike_ids, times);
@@ -67,9 +73,10 @@ int main(int argc, char **argv){
     for(int i = 0; i < N_Group_S; i++){
         for(int j = 0; j < N_Group_T; j++){
             index = i*N_Group_T + j;
-            init_const = distrib_synapses(gen);
+            //init_const = distrib_synapses(gen);
             init_input_U[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+0,2))))*(Umax-Umin)+Umin;
             init_input_A[index] = exp(-(((pow((init_const+1)-input1_pos,2)))/(2.0*pow(rad+3,2))))*(Amax-Amin)+Amin;
+            init_const++;
         }
     }
     Synapses Input_AdEx_synapses(input_neurons, AdEx_neurons, init_input_FBp, init_input_FBn, init_input_R, init_input_U, init_input_A);
@@ -79,8 +86,8 @@ int main(int argc, char **argv){
     for(int t = 0; t < timesteps; t++){
         input_neurons.generate_spikes(t*defaultclock_dt);
         AdEx_neurons.solve_neurons();
-        input_neurons.print_spikes();
-        AdEx_neurons.print_spikes();
+        // input_neurons.print_spikes();
+        // AdEx_neurons.print_spikes();
         Input_AdEx_synapses.UpdateSynapses_pre(t*defaultclock_dt);
         Input_AdEx_synapses.UpdateSynapses_post(t*defaultclock_dt);
     }

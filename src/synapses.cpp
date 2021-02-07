@@ -82,37 +82,6 @@ void Synapses::UpdateSynapses_post(double t){
 	        }
 	    }
 	}
-	/// Improved kernel
-	// double sum = 0;
-	// for (int i = 0; i < N_Group_T; i++){
-	//     if (post_spikes[i] > 0){
-	//         for (int j = 0; j < N_Group_S; j++){
-    //             index = i+j*N_Group_T;
-    //             FFp[index] = FFp[index] * std::exp(-(-lastupdate[index] + t)/tau_FFp);
-    //             FBn[index] = FBn[index] * std::exp(-(-lastupdate[index] + t)/tau_FBn);
-    //             u[index] = U[index] + (-U[index] + u[index]) * std::exp(-(-lastupdate[index] + t)/tau_u);
-    //             FBp[index] = FBp[index] * std::exp(-(-lastupdate[index] + t)/tau_FBp);
-    //             R[index] = (R[index] - 1) * std::exp(-(-lastupdate[index] + t)/tau_r) + 1;
-    //             A[index] = A[index] + etaA * (AFFp * FFp[index] * FBn[index]);
-	// 			sum += AFFp * FFp[index] * FBn[index];
-	//         }
-	//     }
-	// }
-	// double mean = (double)sum / (N_Group_S*N_Group_T);
-	// for (int i = 0; i < N_Group_T; i++){
-	//     if (post_spikes[i] > 0){
-	//         for (int j = 0; j < N_Group_S; j++){
-    //             index = i+j*N_Group_T;
-	// 			A[index] = A[index] - etaA * 0.5 * mean; //amfibola swsto, sigoura mi apodotiko
-    //             if (A[index] < Amin) A[index] = Amin;
-    //             else if (A[index] > Amax) A[index] = Amax;
-    //             w[index] = U[index] * A[index];
-    //             FBp[index] += 1;
-    //             FBn[index] += 1;
-	// 			lastupdate[index] = t;
-	//         }
-	//     }
-	// }
 }
 
 void Synapses::print_synapses(){
